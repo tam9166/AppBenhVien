@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Quét QR trực tiếp')}"></head>
+<body class="qr-info-page">
+<div class="container py-4 py-lg-5">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <span class="badge text-bg-light text-primary mb-2">QR Live Demo</span>
+            <h2 class="mb-1">Quét QR bằng camera điện thoại</h2>
+            <p class="text-muted mb-0">Mở trang này trên điện thoại, cấp quyền camera, đưa QR vào khung và hệ thống sẽ mở ngay trang vật tư.</p>
+        </div>
+        <a th:href="${backUrl}" class="btn btn-outline-secondary">Quay lại</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card card-panel border-0 h-100">
+                <div class="card-body p-3 p-lg-4">
+                    <div id="httpsWarning" class="alert alert-warning d-none mb-3">
+                        Camera trên điện thoại thường chỉ hoạt động với HTTPS. Nếu không mở được camera, hãy dùng tunnel HTTPS như ngrok hoặc cloudflared.
+                    </div>
+                    <div id="reader" class="scanner-shell scanner-reader"></div>
+                    <div id="scanStatus" class="alert alert-secondary mt-3 mb-0">
+                        Đang chờ khởi tạo bộ quét QR.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card card-panel border-0 mb-4">
+                <div class="card-body p-4">
+                    <h4 class="mb-3">Kết quả quét</h4>
+                    <div class="mb-3">
+                        <label for="scanResult" class="form-label">Nội dung QR</label>
+                        <input id="scanResult" type="text" class="form-control" readonly placeholder="Chưa có kết quả">
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a id="openResultLink" href="#" class="btn btn-medical disabled" aria-disabled="true">Mở trang vật tư</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card card-panel border-0 mb-4">
+                <div class="card-body p-4">
+                    <h4 class="mb-3">Mở trên điện thoại</h4>
+                    <div class="text-center mb-3">
+                        <img th:src="@{/qr/live-entry-image}" alt="QR mở trang scan live" class="img-fluid qr-large">
+                    </div>
+                    <p class="text-muted small mb-2">Điện thoại phải cùng Wi‑Fi và dùng link IP LAN, không dùng localhost.</p>
+                    <input type="text" class="form-control" th:value="${mobileScanUrl}" readonly>
+                </div>
+            </div>
+
+            <div class="card card-panel border-0">
+                <div class="card-body p-4">
+                    <h4 class="mb-3">Fallback khi demo</h4>
+                    <p class="text-muted">Nếu camera không mở được, bạn vẫn có thể nhập mã vật tư để demo luồng QR.</p>
+                    <div class="input-group">
+                        <input id="manualCodeInput" type="text" class="form-control" placeholder="VD: VT001">
+                        <button id="manualOpenButton" type="button" class="btn btn-outline-primary">Tra cứu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode" defer></script>
+<script th:inline="javascript">
+    (() => {
+        const scanBaseUrl = /*[[${scanBaseUrl}]]*/ "";
+        const mobileScanUrl = /*[[${mobileScanUrl}]]*/ "";
+        const statusBox = document.getElementById("scanStatus");
+        const resultInput = document.getElementById("scanResult");
+        const resultLink = document.getElementById("openResultLink");
+        const manualCodeInput = document.getElementById("manualCodeInput");
+        const manualOpenButton = document.getElementById("manualOpenButton");
+        const httpsWarning = document.getElementById("httpsWarning");
+
+        let scanner = null;
+        let lastValue = "";
+
+        function setStatus(message, type) {
+            statusBox.className = "alert mt-3 mb-0 alert-" + type;
+            statusBox.textContent = message;
+        }
+
+        function normalizeResult(rawValue) {
+            const value = (rawValue || "").trim();
+            if (!value) {
+                return "";
+            }
+            if (value.startsWith(scanBaseUrl)) {
+                return value;
+            }
+            if (/^https?:\/\//i.test(value)) {
+                return value;
+            }
+            return scanBaseUrl + encodeURIComponent(value);
+        }
+
+        function openResult(rawValue) {
+            lastValue = rawValue;
+            resultInput.value = rawValue;
+            const targetUrl = normalizeResult(rawValue);
+            resultLink.href = targetUrl || "#";
+            resultLink.classList.toggle("disabled", !targetUrl);
+            resultLink.setAttribute("aria-disabled", String(!targetUrl));
+            if (targetUrl) {
+                setStatus("Đã nhận diện mã QR. Đang mở trang vật tư...", "success");
+                window.setTimeout(() => {
+                    window.location.href = targetUrl;
+                }, 500);
+            }
+        }
+
+        function openManualCode() {
+            const code = manualCodeInput.value.trim();
+            if (!code) {
+                setStatus("Nhập mã vật tư để tra cứu fallback.", "warning");
+                return;
+            }
+            window.location.href = scanBaseUrl + encodeURIComponent(code);
+        }
+
+        function showSecurityHints() {
+            const isLocalLan = mobileScanUrl.startsWith("http://") && !mobileScanUrl.includes("localhost");
+            if (isLocalLan && !window.isSecureContext) {
+                httpsWarning.classList.remove("d-none");
+            }
+        }
+
+        function startHtml5Qrcode() {
+            if (typeof Html5QrcodeScanner === "undefined") {
+                setStatus("Không tải được thư viện quét QR. Kiểm tra Internet rồi tải lại trang.", "danger");
+                return;
+            }
+
+            scanner = new Html5QrcodeScanner(
+                "reader",
+                {
+                    fps: 10,
+                    qrbox: { width: 260, height: 260 },
+                    aspectRatio: 1.0,
+                    rememberLastUsedCamera: true,
+                    showTorchButtonIfSupported: true,
+                    supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA, Html5QrcodeScanType.SCAN_TYPE_FILE]
+                },
+                false
+            );
+
+            scanner.render(
+                (decodedText) => {
+                    if (!decodedText || decodedText === lastValue) {
+                        return;
+                    }
+                    openResult(decodedText);
+                },
+                () => {}
+            );
+
+            setStatus("Nếu trình duyệt hỗ trợ camera, hãy cấp quyền và bắt đầu quét.", "info");
+        }
+
+        manualOpenButton.addEventListener("click", openManualCode);
+        manualCodeInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                openManualCode();
+            }
+        });
+
+        showSecurityHints();
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", startHtml5Qrcode);
+        } else {
+            startHtml5Qrcode();
+        }
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<div th:fragment="sidebar(activeMenu)" class="sidebar-wrapper">
+    <div class="brand-block">
+        <div class="brand-icon"><i class="bi bi-hospital"></i></div>
+        <div class="brand-copy">
+            <h5 class="mb-0">Bệnh viện Ung bướu</h5>
+            <small>Hệ thống quản lý kho</small>
+        </div>
+    </div>
+    <ul class="nav flex-column sidebar-nav">
+        <li class="nav-item"><a class="nav-link" th:classappend="${activeMenu == 'dashboard'} ? 'active'" th:href="@{/dashboard}"><i class="bi bi-grid"></i> Bảng điều khiển</a></li>
+        <li class="nav-item"><a class="nav-link" th:classappend="${activeMenu == 'inventory'} ? 'active'" th:href="@{/medical-supplies}"><i class="bi bi-box-seam"></i> Vật tư y tế</a></li>
+        <li class="nav-item"><a class="nav-link" th:classappend="${activeMenu == 'qr-scan'} ? 'active'" th:href="@{/qr/scan-live}"><i class="bi bi-qr-code-scan"></i> Quét QR live</a></li>
+        <li class="nav-item"><a class="nav-link" th:classappend="${activeMenu == 'inbound'} ? 'active'" th:href="@{/inbound/receipts}"><i class="bi bi-box-arrow-in-down"></i> Nhập kho</a></li>
+        <li class="nav-item"><a class="nav-link" th:classappend="${activeMenu == 'outbound'} ? 'active'" th:href="@{/outbound/receipts}"><i class="bi bi-box-arrow-up"></i> Xuất kho</a></li>
+        <li class="nav-item"><a class="nav-link" th:classappend="${activeMenu == 'patient'} ? 'active'" th:href="@{/patient}"><i class="bi bi-person-hearts"></i> Cổng bệnh nhân</a></li>
+        <li class="nav-item"><a class="nav-link" th:classappend="${activeMenu == 'appointments'} ? 'active'" th:href="@{/appointments}"><i class="bi bi-calendar2-check"></i> Lịch hẹn khám</a></li>
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')"><a class="nav-link" th:classappend="${activeMenu == 'reports'} ? 'active'" th:href="@{/reports}"><i class="bi bi-bar-chart"></i> Báo cáo</a></li>
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')"><a class="nav-link" th:classappend="${activeMenu == 'audit'} ? 'active'" th:href="@{/audit-logs}"><i class="bi bi-clock-history"></i> Nhật ký hoạt động</a></li>
+    </ul>
+</div>
+
+<div th:fragment="topbar(pageTitle)" class="topbar">
+    <div>
+        <h3 class="mb-0" th:text="${pageTitle}">Trang</h3>
+        <small class="text-muted">Bệnh viện Ung bướu - Hệ thống quản lý vật tư y tế bằng QR Code</small>
+    </div>
+    <div class="d-flex align-items-center gap-3 flex-wrap justify-content-end">
+        <a class="btn btn-outline-secondary btn-sm" th:href="@{/}"><i class="bi bi-house-door"></i> Về trang tổng quát</a>
+        <div class="text-end">
+            <div class="fw-semibold" sec:authentication="name">admin</div>
+            <small class="text-muted" sec:authorize="hasRole('ADMIN')">Quản trị viên</small>
+            <small class="text-muted" sec:authorize="hasRole('STAFF')">Nhân viên kho</small>
+        </div>
+        <form th:action="@{/logout}" method="post">
+            <button class="btn btn-outline-danger btn-sm" type="submit"><i class="bi bi-box-arrow-right"></i> Đăng xuất</button>
+        </form>
+    </div>
+</div>
+
+<div th:fragment="scripts">
+    <script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/webjars/chart.js/4.4.4/dist/chart.umd.js}"></script>
+    <script th:src="@{/js/app.js}"></script>
+</div>
+</body>
+</html>

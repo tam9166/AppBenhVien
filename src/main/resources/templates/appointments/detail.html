@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Chi tiết lịch hẹn')}"></head>
+<body>
+<div class="app-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('appointments')}"></aside>
+    <main class="main-content">
+        <header th:replace="~{fragments/layout :: topbar('Chi tiết lịch hẹn')}"></header>
+        <section class="content-area">
+            <div class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="row g-4">
+                <div class="col-xl-7">
+                    <div class="card card-panel">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Thông tin bệnh nhân</h5>
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4">Người bệnh</dt><dd class="col-sm-8" th:text="${appointment.patientName}"></dd>
+                                <dt class="col-sm-4">Số điện thoại</dt><dd class="col-sm-8" th:text="${appointment.phone}"></dd>
+                                <dt class="col-sm-4">Email</dt><dd class="col-sm-8" th:text="${appointment.email ?: 'Không có'}"></dd>
+                                <dt class="col-sm-4">Khoa khám</dt><dd class="col-sm-8" th:text="${appointment.department}"></dd>
+                                <dt class="col-sm-4">Thời gian</dt><dd class="col-sm-8" th:text="${appointment.appointmentDate + ' ' + appointment.appointmentTime}"></dd>
+                                <dt class="col-sm-4">Trạng thái</dt><dd class="col-sm-8" th:text="${appointment.status}"></dd>
+                                <dt class="col-sm-4">QR</dt><dd class="col-sm-8" th:text="${appointment.qrCode}"></dd>
+                                <dt class="col-sm-4">Mức ưu tiên</dt><dd class="col-sm-8"><span class="badge" th:classappend="${appointment.emergency} ? ' text-bg-danger' : ' text-bg-warning'" th:text="${appointment.priorityLevel}"></span></dd>
+                                <dt class="col-sm-4">Tóm tắt AI</dt><dd class="col-sm-8"><pre class="screening-summary mb-0" th:text="${appointment.triageSummary ?: 'Chưa có'}"></pre></dd>
+                                <dt class="col-sm-4">Triệu chứng</dt><dd class="col-sm-8" th:text="${appointment.symptoms ?: 'Không có'}"></dd>
+                                <dt class="col-sm-4">Ghi chú admin</dt><dd class="col-sm-8" th:text="${appointment.adminNote ?: 'Chưa có'}"></dd>
+                                <dt class="col-sm-4">Số thứ tự chờ</dt><dd class="col-sm-8" th:text="${appointment.queueNumber ?: 'Chưa check-in'}"></dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-5">
+                    <div class="card card-panel mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Xử lý lịch hẹn</h5>
+                            <form th:action="@{/appointments/{id}/status(id=${appointment.id})}" method="post" class="mb-3">
+                                <label class="form-label">Cập nhật trạng thái</label>
+                                <select class="form-select mb-3" name="status">
+                                    <option th:each="item : ${statusOptions}" th:value="${item.name()}" th:selected="${appointment.status == item}" th:text="${item.name()}"></option>
+                                </select>
+                                <label class="form-label">Ghi chú admin</label>
+                                <textarea class="form-control mb-3" name="adminNote" rows="4" th:text="${appointment.adminNote}"></textarea>
+                                <button class="btn btn-medical w-100" type="submit">Lưu trạng thái</button>
+                            </form>
+                            <form th:if="${appointment.status.name() != 'CHECKED_IN'}" th:action="@{/appointments/{id}/check-in(id=${appointment.id})}" method="post">
+                                <button class="btn btn-outline-primary w-100" type="submit">Check-in và đưa vào danh sách chờ</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card card-panel" th:if="${screeningTicket != null}">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Phiếu sàng lọc liên kết</h5>
+                            <p class="small text-muted mb-2" th:text="${#temporals.format(screeningTicket.createdAt, 'dd/MM/yyyy HH:mm')}"></p>
+                            <p class="mb-2"><strong>Khoa gợi ý:</strong> <span th:text="${screeningTicket.suggestedDepartment}"></span></p>
+                            <p class="mb-2"><strong>Mức độ:</strong> <span th:text="${screeningTicket.riskLevel}"></span></p>
+                            <pre class="screening-summary mb-0" th:text="${screeningTicket.summary}"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Phiếu sàng lọc')}"></head>
+<body class="home-page">
+<div class="container py-4 py-lg-5">
+    <div class="card card-panel">
+        <div class="card-body p-4 p-lg-5">
+            <div class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="d-flex justify-content-between gap-3 flex-wrap mb-4">
+                <div>
+                    <h1 class="h3 mb-1">Phiếu sàng lọc tự động</h1>
+                    <p class="text-muted mb-0" th:text="${#temporals.format(ticket.createdAt, 'dd/MM/yyyy HH:mm')}">Thời gian</p>
+                </div>
+                <span class="badge fs-6" th:classappend="${ticket.emergency} ? ' text-bg-danger' : ' text-bg-primary'" th:text="${ticket.riskLevel}">mức độ</span>
+            </div>
+            <dl class="row">
+                <dt class="col-sm-3">Triệu chứng</dt><dd class="col-sm-9" th:text="${ticket.patientMessage}">Nội dung</dd>
+                <dt class="col-sm-3">Khoa gợi ý</dt><dd class="col-sm-9" th:text="${ticket.suggestedDepartment}">Khoa</dd>
+                <dt class="col-sm-3">Điểm nguy cơ</dt><dd class="col-sm-9" th:text="${ticket.riskScore}">0</dd>
+                <dt class="col-sm-3">Tóm tắt</dt><dd class="col-sm-9"><pre class="screening-summary" th:text="${ticket.summary}">Tóm tắt</pre></dd>
+            </dl>
+            <div class="d-flex gap-2 flex-wrap">
+                <a class="btn btn-medical" th:href="@{/patient/appointments/new(screeningTicketId=${ticket.id})}">Đặt lịch theo khoa gợi ý</a>
+                <a class="btn btn-outline-secondary" th:href="@{/patient}">Quay lại</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Đăng nhập hệ thống')}"></head>
+<body class="login-page">
+<div class="container">
+    <div class="row min-vh-100 align-items-center justify-content-center">
+        <div class="col-lg-10">
+            <div class="login-card shadow-lg">
+                <div class="row g-0">
+                    <div class="col-lg-6 login-hero p-5">
+                        <span class="badge rounded-pill text-bg-light px-3 py-2 mb-3">Medical Inventory Management</span>
+                        <h1>Quản lý vật tư y tế hiện đại, an toàn và trực quan.</h1>
+                        <p class="mt-3">Đăng nhập để theo dõi tồn kho, hạn sử dụng, thống kê nhập xuất và tra cứu vật tư bằng QR Code.</p>
+                        <div class="hero-stat-grid">
+                            <div class="hero-stat-card"><strong>QR</strong><span>Kiểm tra nhanh thông tin vật tư</span></div>
+                            <div class="hero-stat-card"><strong>Alert</strong><span>Cảnh báo tồn kho và hết hạn</span></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 p-5 bg-white">
+                        <div class="mb-4 d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                            <div>
+                                <h3 class="fw-bold">Đăng nhập hệ thống</h3>
+                                <p class="text-muted mb-0">Sử dụng tài khoản đã được cấp để truy cập khu quản trị.</p>
+                            </div>
+                            <a class="btn btn-outline-secondary" th:href="@{/}">Về trang tổng quát</a>
+                        </div>
+                        <div th:if="${param.error}" class="alert alert-danger">Sai tên đăng nhập hoặc mật khẩu.</div>
+                        <div th:if="${param.logout}" class="alert alert-success">Bạn đã đăng xuất thành công.</div>
+                        <form th:action="@{/perform-login}" method="post">
+                            <div class="mb-3">
+                                <label class="form-label">Tên đăng nhập</label>
+                                <input type="text" name="username" class="form-control form-control-lg" placeholder="Nhập username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Mật khẩu</label>
+                                <input type="password" name="password" class="form-control form-control-lg" placeholder="Nhập mật khẩu" required>
+                            </div>
+                            <div class="form-check mb-4">
+                                <input class="form-check-input" type="checkbox" name="remember-me" id="rememberMe">
+                                <label class="form-check-label" for="rememberMe">Ghi nhớ đăng nhập</label>
+                            </div>
+                            <button type="submit" class="btn btn-medical w-100 btn-lg">Đăng nhập</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Thông tin QR vật tư')}"></head>
+<body class="qr-info-page">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card card-panel">
+                <div class="card-body p-4">
+                    <div class="row align-items-center g-4">
+                        <div class="col-md-4 text-center">
+                            <img th:src="@{'/qr/image/' + ${supply.id}}" alt="QR Code" class="img-fluid qr-large">
+                        </div>
+                        <div class="col-md-8">
+                            <span class="badge text-bg-info mb-2">Tra cứu bằng QR Code</span>
+                            <h3 th:text="${supply.name}">Tên vật tư</h3>
+                            <p class="text-muted mb-4" th:text="${supply.code}">Mã</p>
+                            <div class="row g-3">
+                                <div class="col-sm-6"><strong>Loại:</strong> <span th:text="${supply.category.name}"></span></div>
+                                <div class="col-sm-6"><strong>Tồn kho:</strong> <span th:text="${supply.quantity}"></span> <span th:text="${supply.unit}"></span></div>
+                                <div class="col-sm-6"><strong>Hạn sử dụng:</strong> <span th:text="${supply.expiryDate}"></span></div>
+                                <div class="col-sm-6"><strong>Nhà cung cấp:</strong> <span th:text="${supply.supplier.name}"></span></div>
+                                <div class="col-12"><strong>Trạng thái:</strong> <span class="badge text-bg-primary" th:text="${supply.status}"></span></div>
+                                <div class="col-12">
+                                    <strong>Public URL:</strong>
+                                    <a th:href="${publicQrUrl}" th:text="${publicQrUrl}" target="_blank"></a>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <a th:href="@{/qr/scan-live}" class="btn btn-outline-primary me-2">Quet camera live</a>
+                                <a th:href="@{/medical-supplies}" class="btn btn-medical">Quay lại danh sách</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

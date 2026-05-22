@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Check-in lịch khám')}"></head>
+<body class="home-page">
+<div class="container py-4 py-lg-5">
+    <div class="card card-panel">
+        <div class="card-body p-4 p-lg-5 text-center">
+            <span class="badge text-bg-success mb-3">QR hợp lệ</span>
+            <h1 class="h3" th:text="${appointment.patientName}">Người bệnh</h1>
+            <p class="lead mb-1" th:text="${appointment.department}">Khoa khám</p>
+            <p class="text-muted" th:text="${appointment.appointmentDate + ' ' + appointment.appointmentTime}">Thời gian</p>
+            <p class="mb-0">Vui lòng đến quầy tiếp nhận để xác nhận thông tin và hoàn tất thủ tục.</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

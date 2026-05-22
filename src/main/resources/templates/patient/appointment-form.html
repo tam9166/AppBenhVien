@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Đặt lịch khám')}"></head>
+<body class="home-page">
+<div class="container py-4 py-lg-5">
+    <div class="card card-panel">
+        <div class="card-body p-4 p-lg-5">
+            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-4">
+                <div>
+                    <h1 class="h3 mb-1">Đặt lịch khám online</h1>
+                    <p class="text-muted mb-0">Lịch hẹn mới sẽ được đẩy sang trang quản trị để bệnh viện theo dõi và chuẩn bị tiếp nhận.</p>
+                </div>
+                <a class="btn btn-outline-secondary" th:href="@{/patient}">Quay lại</a>
+            </div>
+
+            <form th:action="@{/patient/appointments}" th:object="${appointment}" method="post" class="row g-3">
+                <input type="hidden" th:field="*{screeningTicketId}">
+                <input type="hidden" th:field="*{triageSummary}">
+                <input type="hidden" th:field="*{priorityLevel}">
+                <input type="hidden" th:field="*{emergency}">
+
+                <div class="col-md-6">
+                    <label class="form-label">Họ tên người bệnh</label>
+                    <input class="form-control" th:field="*{patientName}" placeholder="Nguyễn Văn A">
+                    <div class="text-danger small" th:errors="*{patientName}"></div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Số điện thoại</label>
+                    <input class="form-control" th:field="*{phone}" placeholder="0xxxxxxxxx">
+                    <div class="text-danger small" th:errors="*{phone}"></div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Email</label>
+                    <input class="form-control" th:field="*{email}" placeholder="email@demo.com">
+                    <div class="text-danger small" th:errors="*{email}"></div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Khoa khám</label>
+                    <select class="form-select" th:field="*{department}">
+                        <option value="">Chọn khoa</option>
+                        <option th:each="department : ${departments}" th:value="${department.name}" th:text="${department.name}"></option>
+                    </select>
+                    <div class="text-danger small" th:errors="*{department}"></div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Ngày khám</label>
+                    <input class="form-control" type="date" th:field="*{appointmentDate}">
+                    <div class="text-danger small" th:errors="*{appointmentDate}"></div>
+                    <div class="text-danger small" th:errors="*{appointmentDateValid}"></div>
+                    <div class="text-danger small" th:errors="*{appointmentDayAllowed}"></div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Giờ khám</label>
+                    <input class="form-control" type="time" th:field="*{appointmentTime}">
+                    <div class="text-danger small" th:errors="*{appointmentTime}"></div>
+                    <div class="text-danger small" th:errors="*{appointmentTimeValid}"></div>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Triệu chứng hoặc nhu cầu khám</label>
+                    <textarea id="appointmentSymptoms" class="form-control" rows="4" th:field="*{symptoms}" placeholder="Mô tả ngắn gọn triệu chứng, nhu cầu tái khám hoặc gói tầm soát muốn đăng ký"></textarea>
+                    <div class="text-danger small" th:errors="*{symptoms}"></div>
+                </div>
+                <div class="col-12">
+                    <div class="border rounded-3 p-3 bg-light">
+                        <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                            <div>
+                                <strong>Gợi ý khoa và mức ưu tiên từ chatbot</strong>
+                                <div class="small text-muted">Dựa trên phần triệu chứng vừa nhập</div>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm" id="appointmentSuggestButton" type="button">Phân tích triệu chứng</button>
+                        </div>
+                        <div id="appointmentSuggestionResult" class="small text-muted mt-3">Chưa phân tích triệu chứng.</div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="alert alert-light border mb-0">
+                        Giờ tiếp nhận lịch online: <strong>07:00 - 16:30</strong>, từ <strong>thứ 2 đến thứ 7</strong>.
+                    </div>
+                </div>
+                <div class="col-12 d-flex gap-3 flex-wrap">
+                    <button class="btn btn-medical btn-lg" type="submit">Gửi lịch khám</button>
+                    <a class="btn btn-outline-primary btn-lg" th:href="@{/patient/departments}">Xem khoa phòng</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Tra cứu lịch khám')}"></head>
+<body class="home-page">
+<div class="container py-4 py-lg-5">
+    <div class="card card-panel">
+        <div class="card-body p-4 p-lg-5">
+            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-4">
+                <div>
+                    <h1 class="h3 mb-1">Tra cứu lịch khám</h1>
+                    <p class="text-muted mb-0">Nhập số điện thoại đã dùng khi đăng ký để xem lại các lịch hẹn.</p>
+                </div>
+                <a class="btn btn-outline-secondary" th:href="@{/patient}">Về cổng bệnh nhân</a>
+            </div>
+            <form class="row g-3 mb-4" method="get" th:action="@{/patient/appointments/lookup}">
+                <div class="col-md-9">
+                    <input class="form-control" type="text" name="phone" placeholder="0xxxxxxxxx" th:value="${lookupPhone}">
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-medical w-100" type="submit">Tra cứu</button>
+                </div>
+            </form>
+            <div th:if="${lookupPhone != null and !lookupPhone.isBlank() and #lists.isEmpty(appointments)}" class="empty-state">Không tìm thấy lịch hẹn theo số điện thoại này.</div>
+            <div th:if="${!#lists.isEmpty(appointments)}" class="table-responsive">
+                <table class="table table-modern mb-0">
+                    <thead>
+                    <tr>
+                        <th>Khoa</th>
+                        <th>Thời gian</th>
+                        <th>Trạng thái</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="appointment : ${appointments}">
+                        <td th:text="${appointment.department}">Khoa</td>
+                        <td th:text="${appointment.appointmentDate + ' ' + appointment.appointmentTime}">Thời gian</td>
+                        <td th:text="${appointment.status}">PENDING</td>
+                        <td><a class="btn btn-outline-primary btn-sm" th:href="@{/patient/appointments/{id}(id=${appointment.id})}">Xem</a></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

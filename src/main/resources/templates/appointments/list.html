@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Qu&#7843;n tr&#7883; l&#7883;ch h&#7865;n')}"></head>
+<body>
+<div class="app-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('appointments')}"></aside>
+    <main class="main-content">
+        <header th:replace="~{fragments/layout :: topbar('Qu&#7843;n tr&#7883; l&#7883;ch h&#7865;n')}"></header>
+        <section class="content-area">
+            <div class="card card-panel mb-4">
+                <div class="card-body">
+                    <form class="row g-3 align-items-end" method="get" th:action="@{/appointments}">
+                        <div class="col-md-4">
+                            <label class="form-label">Ng&#224;y kh&#225;m</label>
+                            <input class="form-control" type="date" name="date" th:value="${selectedDate}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Tr&#7841;ng th&#225;i</label>
+                            <select class="form-select" name="status">
+                                <option value="">T&#7845;t c&#7843;</option>
+                                <option th:each="item : ${statusOptions}" th:value="${item.name()}" th:selected="${selectedStatus == item.name()}" th:text="${item.name()}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-medical w-100" type="submit">L&#7885;c l&#7883;ch h&#7865;n</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-xl-8">
+                    <div class="card card-panel">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">Danh s&#225;ch l&#7883;ch h&#7865;n</h5>
+                                    <p class="text-muted mb-0">Theo d&#245;i, x&#225;c nh&#7853;n, h&#7911;y ho&#7863;c check-in l&#7883;ch kh&#225;m.</p>
+                                </div>
+                            </div>
+                            <div th:if="${#lists.isEmpty(appointments)}" class="empty-state">Ch&#432;a c&#243; l&#7883;ch h&#7865;n ph&#249; h&#7907;p b&#7897; l&#7885;c.</div>
+                            <div th:if="${!#lists.isEmpty(appointments)}" class="table-responsive">
+                                <table class="table table-modern align-middle">
+                                    <thead>
+                                    <tr>
+                                        <th>Ng&#432;&#7901;i b&#7879;nh</th>
+                                        <th>Khoa</th>
+                                        <th>Th&#7901;i gian</th>
+                                        <th>&#431;u ti&#234;n</th>
+                                        <th>Tr&#7841;ng th&#225;i</th>
+                                        <th></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="appointment : ${appointments}">
+                                        <td>
+                                            <div class="fw-semibold" th:text="${appointment.patientName}">Ng&#432;&#7901;i b&#7879;nh</div>
+                                            <div class="small text-muted" th:text="${appointment.phone}">S&#272;T</div>
+                                        </td>
+                                        <td th:text="${appointment.department}">Khoa</td>
+                                        <td th:text="${appointment.appointmentDate + ' ' + appointment.appointmentTime}">Th&#7901;i gian</td>
+                                        <td>
+                                            <span class="badge" th:classappend="${appointment.emergency} ? ' text-bg-danger' : ' text-bg-warning'" th:text="${appointment.priorityLevel}">&#431;u ti&#234;n</span>
+                                        </td>
+                                        <td th:text="${appointment.status}">PENDING</td>
+                                        <td><a class="btn btn-outline-primary btn-sm" th:href="@{/appointments/{id}(id=${appointment.id})}">Chi ti&#7871;t</a></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4">
+                    <div class="card card-panel mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Danh s&#225;ch ch&#7901; h&#244;m nay</h5>
+                            <div th:if="${#lists.isEmpty(queueAppointments)}" class="empty-state">Ch&#432;a c&#243; b&#7879;nh nh&#226;n check-in.</div>
+                            <div th:each="appointment : ${queueAppointments}" class="alert-list-item">
+                                <div>
+                                    <strong th:text="${appointment.patientName}">Ng&#432;&#7901;i b&#7879;nh</strong>
+                                    <div class="small text-muted" th:text="${appointment.department}">Khoa</div>
+                                </div>
+                                <span class="badge text-bg-primary" th:text="${appointment.queueNumber}">1</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card card-panel">
+                        <div class="card-body">
+                            <h5 class="card-title">L&#7883;ch c&#7847;n nh&#7855;c ng&#224;y mai</h5>
+                            <div th:if="${#lists.isEmpty(nextDayReminders)}" class="empty-state">Ch&#432;a c&#243; l&#7883;ch c&#7847;n nh&#7855;c.</div>
+                            <div th:each="appointment : ${nextDayReminders}" class="alert-list-item">
+                                <div>
+                                    <strong th:text="${appointment.patientName}">Ng&#432;&#7901;i b&#7879;nh</strong>
+                                    <div class="small text-muted" th:text="${appointment.department + ' - ' + appointment.appointmentTime}">Chi ti&#7871;t</div>
+                                </div>
+                                <span class="badge text-bg-warning" th:text="${appointment.status}">PENDING</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-6">
+                    <div class="card card-panel">
+                        <div class="card-body">
+                            <h5 class="card-title">Khoa &#273;&#432;&#7907;c &#273;&#7863;t nhi&#7873;u trong 30 ng&#224;y</h5>
+                            <div th:if="${#lists.isEmpty(departmentDemand)}" class="empty-state">Ch&#432;a c&#243; d&#7919; li&#7879;u.</div>
+                            <div th:each="row : ${departmentDemand}" class="alert-list-item">
+                                <strong th:text="${row[0]}">Khoa</strong>
+                                <span class="badge text-bg-primary" th:text="${row[1]}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="card card-panel">
+                        <div class="card-body">
+                            <h5 class="card-title">Th&#244;ng b&#225;o l&#7883;ch h&#7865;n m&#7899;i</h5>
+                            <div th:if="${#lists.isEmpty(newAppointmentNotifications)}" class="empty-state">Ch&#432;a c&#243; th&#244;ng b&#225;o m&#7899;i.</div>
+                            <div th:each="alert : ${newAppointmentNotifications}" class="alert-list-item">
+                                <div>
+                                    <strong th:text="${alert.title}">Th&#244;ng b&#225;o</strong>
+                                    <div class="small text-muted" th:text="${alert.message}">N&#7897;i dung</div>
+                                </div>
+                                <span class="badge text-bg-danger" th:text="${#temporals.format(alert.lastDetectedAt, 'dd/MM HH:mm')}">10/05</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

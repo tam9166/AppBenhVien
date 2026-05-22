@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Trang tổng quan hệ thống')}"></head>
+<body class="home-page">
+<div class="container py-4 py-lg-5">
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm rounded-4 px-3 px-lg-4 mb-4 mb-lg-5">
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" th:href="@{/}">
+            <span class="brand-icon-sm"><i class="bi bi-hospital"></i></span>
+            <span>Bệnh viện Ung bướu</span>
+        </a>
+        <div class="ms-auto d-flex gap-2">
+            <a class="btn btn-outline-primary" th:href="@{/qr/scan-live}">Quét camera</a>
+            <a class="btn btn-outline-primary" th:href="@{/patient}">Cổng bệnh nhân</a>
+            <a class="btn btn-outline-primary" th:href="@{/scan/VT001}">Demo QR</a>
+            <a class="btn btn-medical" th:href="@{/login}">Đăng nhập</a>
+        </div>
+    </nav>
+
+    <section class="home-hero card card-panel border-0 mb-4 mb-lg-5">
+        <div class="card-body p-4 p-lg-5">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-7">
+                    <span class="badge text-bg-light text-primary mb-3 px-3 py-2">Hospital Inventory Platform</span>
+                    <h1 class="display-5 fw-bold mb-3">Quản lý vật tư y tế, lô hàng, cảnh báo và QR Code trên một hệ thống duy nhất.</h1>
+                    <p class="lead text-muted mb-4">Nền tảng hỗ trợ quản trị kho, nhập xuất theo lô, cảnh báo tồn kho, cảnh báo hạn sử dụng và tra cứu nhanh bằng QR code.</p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a class="btn btn-medical btn-lg" th:href="@{/dashboard}">Vào trang tổng quan</a>
+                        <a class="btn btn-outline-primary btn-lg" th:href="@{/qr/scan-live}">Quét QR bằng camera</a>
+                        <a class="btn btn-outline-secondary btn-lg" th:href="@{/scan/VT001}">Tra cứu QR mẫu</a>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div id="hospitalPhotoCarousel" class="carousel slide hospital-hero-figure hospital-carousel mb-4"
+                         data-bs-ride="carousel" data-bs-interval="4000" data-bs-touch="true">
+                        <div class="carousel-indicators hospital-carousel-indicators">
+                            <button type="button" data-bs-target="#hospitalPhotoCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Toàn cảnh bệnh viện"></button>
+                            <button type="button" data-bs-target="#hospitalPhotoCarousel" data-bs-slide-to="1" aria-label="Khoa Khám bệnh và Cấp cứu"></button>
+                            <button type="button" data-bs-target="#hospitalPhotoCarousel" data-bs-slide-to="2" aria-label="Khoa Nội 1"></button>
+                            <button type="button" data-bs-target="#hospitalPhotoCarousel" data-bs-slide-to="3" aria-label="Khoa Nội soi"></button>
+                            <button type="button" data-bs-target="#hospitalPhotoCarousel" data-bs-slide-to="4" aria-label="Khoa Xạ trị"></button>
+                            <button type="button" data-bs-target="#hospitalPhotoCarousel" data-bs-slide-to="5" aria-label="Khoa Chẩn đoán hình ảnh"></button>
+                        </div>
+                        <div class="carousel-inner">
+                            <div class="carousel-item active hospital-slide">
+                                <img th:src="@{/images/benh-vien-ung-buou-da-nang.jpg}" alt="Toàn cảnh Bệnh viện Ung bướu Đà Nẵng">
+                                <div class="hospital-slide-caption"><strong>Toàn cảnh bệnh viện</strong><span>Bệnh viện Ung bướu Đà Nẵng</span></div>
+                            </div>
+                            <div class="carousel-item hospital-slide">
+                                <img th:src="@{/images/bvubdn-cap-cuu.jpg}" alt="Khoa Khám bệnh và Cấp cứu">
+                                <div class="hospital-slide-caption"><strong>Khoa Khám bệnh và Cấp cứu</strong><span>Tiếp nhận và sàng lọc người bệnh</span></div>
+                            </div>
+                            <div class="carousel-item hospital-slide">
+                                <img th:src="@{/images/bvubdn-noi-1.jpg}" alt="Khoa Nội 1">
+                                <div class="hospital-slide-caption"><strong>Khoa Nội 1</strong><span>Điều trị nội khoa ung bướu</span></div>
+                            </div>
+                            <div class="carousel-item hospital-slide">
+                                <img th:src="@{/images/bvubdn-noi-soi.jpg}" alt="Khoa Nội soi và thăm dò chức năng">
+                                <div class="hospital-slide-caption"><strong>Khoa Nội soi</strong><span>Thăm dò chức năng và chẩn đoán</span></div>
+                            </div>
+                            <div class="carousel-item hospital-slide">
+                                <img th:src="@{/images/bvubdn-xa-tri.jpg}" alt="Khoa Xạ trị">
+                                <div class="hospital-slide-caption"><strong>Khoa Xạ trị</strong><span>Điều trị chuyên sâu bằng xạ trị</span></div>
+                            </div>
+                            <div class="carousel-item hospital-slide">
+                                <img th:src="@{/images/bvubdn-chan-doan-hinh-anh.jpg}" alt="Khoa Chẩn đoán hình ảnh">
+                                <div class="hospital-slide-caption"><strong>Khoa Chẩn đoán hình ảnh</strong><span>Hỗ trợ chẩn đoán bằng thiết bị hình ảnh</span></div>
+                            </div>
+                        </div>
+                        <button class="carousel-control-prev hospital-carousel-control" type="button" data-bs-target="#hospitalPhotoCarousel" data-bs-slide="prev" aria-label="Ảnh trước">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        </button>
+                        <button class="carousel-control-next hospital-carousel-control" type="button" data-bs-target="#hospitalPhotoCarousel" data-bs-slide="next" aria-label="Ảnh tiếp theo">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                    <div class="hero-summary-grid">
+                        <div class="hero-summary-card">
+                            <strong>QR Public</strong>
+                            <span>Tra cứu nhanh bằng URL scan công khai</span>
+                        </div>
+                        <div class="hero-summary-card">
+                            <strong>FEFO</strong>
+                            <span>Xuất kho ưu tiên lô gần hết hạn</span>
+                        </div>
+                        <div class="hero-summary-card">
+                            <strong>Nhật ký</strong>
+                            <span>Theo dõi thao tác người dùng theo thời gian</span>
+                        </div>
+                        <div class="hero-summary-card">
+                            <strong>Cảnh báo</strong>
+                            <span>Cảnh báo chủ động theo lịch mỗi ngày</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="row g-4 mb-4 mb-lg-5">
+        <div class="col-lg-4">
+            <div class="card card-panel h-100">
+                <div class="card-body">
+                    <h4>1. Nhập kho theo lô</h4>
+                    <p class="text-muted mb-0">Mỗi lần nhập đều lưu số lô, ngày sản xuất và hạn dùng để quản lý tồn kho thực tế hơn.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card card-panel h-100">
+                <div class="card-body">
+                    <h4>2. Xuất kho theo FEFO</h4>
+                    <p class="text-muted mb-0">Hệ thống tự ưu tiên xuất từ lô có hạn dùng gần nhất để giảm rủi ro hao hụt và hết hạn.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card card-panel h-100">
+                <div class="card-body">
+                    <h4>3. Bảng điều khiển điều hành</h4>
+                    <p class="text-muted mb-0">Theo dõi tồn kho, giá trị tồn, số phiếu nhập xuất, cảnh báo và audit log trên cùng một màn hình.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="row g-4 mb-4 mb-lg-5">
+        <div class="col-lg-7">
+            <div class="card card-panel border-0 h-100">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-4">
+                        <div>
+                            <span class="badge text-bg-light text-primary mb-2 px-3 py-2">AI Tư vấn sơ bộ</span>
+                            <h3 class="mb-2">Trợ lý công khai cho khách và bệnh nhân</h3>
+                            <p class="text-muted mb-0">Hỏi thông tin bệnh viện, mô tả triệu chứng và nhận hỗ trợ sàng lọc ban đầu. Sau khi đăng nhập, trợ lý còn có thể tra cứu dữ liệu kho vật tư.</p>
+                        </div>
+                        <div class="assistant-status">
+                            <i class="bi bi-shield-check"></i>
+                            <span>Không chẩn đoán, không hiển thị dữ liệu nội bộ</span>
+                        </div>
+                    </div>
+
+                    <form id="assistantForm" class="assistant-form">
+                        <label class="form-label fw-semibold" for="assistantMessage">Câu hỏi hoặc triệu chứng</label>
+                        <textarea id="assistantMessage" class="form-control assistant-textarea" rows="5" placeholder="Ví dụ: Tôi đau ngực và khó thở. Bệnh viện mở cửa mấy giờ?"></textarea>
+                        <div class="d-flex flex-wrap gap-2 mt-3 mb-3">
+                            <button class="btn btn-sm btn-outline-primary assistant-suggestion" type="button" data-message="Tôi đau ngực và khó thở">Đau ngực, khó thở</button>
+                            <button class="btn btn-sm btn-outline-primary assistant-suggestion" type="button" data-message="Tôi đau bụng và sốt cao">Đau bụng, sốt cao</button>
+                            <button class="btn btn-sm btn-outline-primary assistant-suggestion" type="button" data-message="Bệnh viện mở cửa mấy giờ và hotline là gì?">Giờ khám, hotline</button>
+                            <button class="btn btn-sm btn-outline-primary assistant-suggestion" type="button" data-message="Tôi nổi mẩn và ngứa nhiều">Nổi mẩn, ngứa</button>
+                        </div>
+                        <div class="d-flex flex-wrap gap-3 align-items-center">
+                            <button class="btn btn-medical" type="submit">
+                                <span class="assistant-submit-label">Gửi yêu cầu</span>
+                            </button>
+                            <small class="text-muted">Chế độ công khai chỉ trả lời FAQ và sàng lọc sơ bộ. Đăng nhập để hỏi dữ liệu kho.</small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card card-panel border-0 h-100">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+                        <h4 class="mb-0">Kết quả tư vấn</h4>
+                        <span id="assistantBadge" class="badge text-bg-light text-primary">Sẵn sàng</span>
+                    </div>
+                    <div id="assistantSummary" class="assistant-summary mb-0">
+                        <div class="empty-state mb-0">Nhập câu hỏi để xem kết quả sàng lọc sơ bộ.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card card-panel border-0">
+        <div class="card-body p-4 p-lg-5">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <h3 class="mb-2">Luồng sử dụng đề xuất khi demo</h3>
+                    <p class="text-muted mb-0">Mở QR mẫu, đăng nhập, xem dashboard, tạo phiếu nhập theo lô, xuất kho và kiểm tra nhật ký hoạt động để trình bày trọn vẹn luồng nghiệp vụ.</p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <a class="btn btn-medical btn-lg" th:href="@{/dashboard}">Bắt đầu xem tổng quan</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

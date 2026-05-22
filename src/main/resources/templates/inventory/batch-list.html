@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Lô hàng và FEFO')}"></head>
+<body>
+<div class="app-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('inventory')}"></aside>
+    <main class="main-content">
+        <header th:replace="~{fragments/layout :: topbar('Theo dõi lô hàng')}"></header>
+        <section class="content-area">
+            <div class="card card-panel mb-4">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap justify-content-between gap-3 align-items-start">
+                        <div>
+                            <span class="badge text-bg-light text-primary mb-2">FEFO sẵn sàng</span>
+                            <h3 class="mb-1" th:text="${supply.name}">Vật tư</h3>
+                            <div class="text-muted">
+                                <span th:text="${supply.code}">VT001</span>
+                                <span> | </span>
+                                <span th:text="${supply.unit}">Hộp</span>
+                                <span> | Tồn tổng: </span>
+                                <strong th:text="${supply.quantity}">0</strong>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-outline-primary" th:href="@{'/qr/info/' + ${supply.qrCode}}">Xem QR</a>
+                            <a class="btn btn-outline-secondary" th:href="@{/medical-supplies}">Quay lại danh sách</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <span class="stats-label">Tổng số lô</span>
+                        <h2 th:text="${#lists.size(batches)}">0</h2>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stats-card warning">
+                        <span class="stats-label">Lô được xuất trước</span>
+                        <h2 th:text="${#lists.isEmpty(batches) ? '-' : batches[0].batchNumber}">-</h2>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stats-card danger">
+                        <span class="stats-label">Hạn gần nhất</span>
+                        <h2 th:text="${#lists.isEmpty(batches) ? '-' : batches[0].expiryDate}">-</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card card-panel">
+                <div class="card-body">
+                    <h4 class="mb-1">Danh sách lô theo thứ tự FEFO</h4>
+                    <p class="text-muted mb-3">Lô có hạn gần nhất sẽ đứng đầu danh sách và được ưu tiên khi xuất kho.</p>
+
+                    <div class="table-responsive">
+                        <table class="table table-modern align-middle">
+                            <thead>
+                            <tr>
+                                <th>Thứ tự FEFO</th>
+                                <th>Số lô</th>
+                                <th>Ngày sản xuất</th>
+                                <th>Hạn sử dụng</th>
+                                <th>Số lượng còn lại</th>
+                                <th>Đánh giá</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="batch, stat : ${batches}">
+                                <td>
+                                    <span class="badge" th:classappend="${stat.index == 0} ? ' text-bg-primary' : ' text-bg-light'">
+                                        <span th:text="${stat.index == 0} ? 'Ưu tiên xuất' : 'Thứ tự ' + (stat.index + 1)">Thứ tự</span>
+                                    </span>
+                                </td>
+                                <td><span class="fw-semibold" th:text="${batch.batchNumber}">LO-001</span></td>
+                                <td th:text="${batch.manufactureDate != null ? batch.manufactureDate : '-'}">2026-01-01</td>
+                                <td th:text="${batch.expiryDate}">2026-12-31</td>
+                                <td>
+                                    <strong th:text="${batch.quantity}">0</strong>
+                                    <span class="text-muted" th:text="${' ' + supply.unit}"> Hộp</span>
+                                </td>
+                                <td>
+                                    <span class="badge text-bg-danger" th:if="${batch.expiryDate.isBefore(today)}">Hết hạn</span>
+                                    <span class="badge text-bg-warning" th:if="${!batch.expiryDate.isBefore(today) and !batch.expiryDate.isAfter(warningDate)}">Sắp hết hạn</span>
+                                    <span class="badge text-bg-secondary" th:if="${batch.quantity == 0}">Đã hết tồn</span>
+                                    <span class="badge text-bg-success" th:if="${batch.quantity > 0 and batch.expiryDate.isAfter(warningDate)}">Ổn định</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(batches)}">
+                                <td colspan="6" class="text-center text-muted py-4">Chưa có lô hàng nào cho vật tư này.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

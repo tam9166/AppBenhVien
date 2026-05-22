@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Danh mục khoa phòng')}"></head>
+<body class="home-page">
+<div class="container py-4 py-lg-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Danh mục khoa phòng</h1>
+        <a class="btn btn-outline-secondary" th:href="@{/patient}">Cổng bệnh nhân</a>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-6 col-xl-4" th:each="department : ${departments}">
+            <div class="card card-panel h-100">
+                <div class="card-body">
+                    <h5 th:text="${department.name}">Khoa</h5>
+                    <p class="text-muted mb-2"><i class="bi bi-geo-alt"></i> <span th:text="${department.location}"></span></p>
+                    <p class="text-muted mb-2"><i class="bi bi-clock"></i> <span th:text="${department.workingHours}"></span></p>
+                    <p class="small text-muted mb-2"><i class="bi bi-telephone"></i> <span th:text="${department.hotline}"></span></p>
+                    <p class="small mb-0" th:text="${department.description}">Mô tả</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Bảng giá viện phí')}"></head>
+<body class="home-page">
+<div class="container py-4 py-lg-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Bảng giá tham khảo</h1>
+        <a class="btn btn-outline-secondary" th:href="@{/patient}">Cổng bệnh nhân</a>
+    </div>
+    <div class="card card-panel">
+        <div class="table-responsive">
+            <table class="table table-modern mb-0">
+                <thead>
+                <tr>
+                    <th>Dịch vụ</th>
+                    <th>Khoảng giá</th>
+                    <th>Ghi chú</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="price : ${prices}">
+                    <td class="fw-semibold" th:text="${price.serviceName}">Khám thường</td>
+                    <td th:text="${#numbers.formatDecimal(price.minPrice,0,'COMMA',0,'POINT') + ' - ' + #numbers.formatDecimal(price.maxPrice,0,'COMMA',0,'POINT') + ' đ'}">0 đ</td>
+                    <td th:text="${price.note}">Ghi chú</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <p class="small text-muted mt-3">Chi phí thực tế phụ thuộc chỉ định bác sĩ, thuốc, vật tư và cận lâm sàng phát sinh.</p>
+</div>
+</body>
+</html>

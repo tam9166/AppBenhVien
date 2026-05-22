@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${pageTitle})}"></head>
+<body>
+<div class="app-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('inventory')}"></aside>
+    <main class="main-content">
+        <header th:replace="~{fragments/layout :: topbar(${pageTitle})}"></header>
+        <section class="content-area">
+            <div class="card card-panel">
+                <div class="card-body">
+                    <form th:action="@{/medical-supplies/save}" th:object="${medicalSupply}" method="post" class="row g-4">
+                        <input type="hidden" th:field="*{id}">
+                        <div class="col-md-6">
+                            <label class="form-label">Mã vật tư</label>
+                            <input type="text" class="form-control" th:field="*{code}">
+                            <div class="text-danger small" th:errors="*{code}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tên vật tư</label>
+                            <input type="text" class="form-control" th:field="*{name}">
+                            <div class="text-danger small" th:errors="*{name}"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Loại vật tư</label>
+                            <select class="form-select" th:field="*{category}">
+                                <option value="">-- Chọn loại vật tư --</option>
+                                <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+                            </select>
+                            <div class="text-danger small" th:errors="*{category}"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Số lượng</label>
+                            <input type="number" class="form-control" th:field="*{quantity}">
+                            <div class="text-danger small" th:errors="*{quantity}"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Đơn vị</label>
+                            <input type="text" class="form-control" th:field="*{unit}">
+                            <div class="text-danger small" th:errors="*{unit}"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Mức tồn tối thiểu</label>
+                            <input type="number" class="form-control" th:field="*{minimumStock}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Đơn giá ước tính</label>
+                            <input type="number" step="0.01" class="form-control" th:field="*{estimatedUnitPrice}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Ngày nhập</label>
+                            <input type="date" class="form-control" th:field="*{importDate}">
+                            <div class="text-danger small" th:errors="*{importDate}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Ngày hết hạn</label>
+                            <input type="date" class="form-control" th:field="*{expiryDate}">
+                            <div class="text-danger small" th:errors="*{expiryDate}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nhà cung cấp</label>
+                            <select class="form-select" th:field="*{supplier}">
+                                <option value="">-- Chọn nhà cung cấp --</option>
+                                <option th:each="supplier : ${suppliers}" th:value="${supplier.id}" th:text="${supplier.name}"></option>
+                            </select>
+                            <div class="text-danger small" th:errors="*{supplier}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Mã QR</label>
+                            <input type="text" class="form-control" th:field="*{qrCode}" placeholder="Để trống hệ thống tự sinh">
+                        </div>
+                        <div class="col-12 d-flex gap-2">
+                            <button type="submit" class="btn btn-medical">Lưu vật tư</button>
+                            <a class="btn btn-outline-secondary" th:href="@{/medical-supplies}">Quay lại</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

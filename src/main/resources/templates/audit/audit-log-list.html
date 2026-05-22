@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Audit Log')}"></head>
+<body>
+<div class="app-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('audit')}"></aside>
+    <main class="main-content">
+        <header th:replace="~{fragments/layout :: topbar('Nhật ký thao tác hệ thống')}"></header>
+        <section class="content-area">
+            <div class="card card-panel">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-modern align-middle">
+                            <thead>
+                            <tr>
+                                <th>Thời gian</th>
+                                <th>Người dùng</th>
+                                <th>Hành động</th>
+                                <th>Đối tượng</th>
+                                <th>Mô tả</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="log : ${logs}">
+                                <td th:text="${#temporals.format(log.createdAt, 'dd/MM/yyyy HH:mm:ss')}">15/05/2026 09:00:00</td>
+                                <td th:text="${log.username}">admin</td>
+                                <td><span class="badge text-bg-primary" th:text="${log.action}">ACTION</span></td>
+                                <td th:text="${log.targetType + ' - ' + log.targetValue}">SUPPLY - VT001</td>
+                                <td th:text="${log.description}">Mô tả</td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(logs)}">
+                                <td colspan="5" class="text-center text-muted py-4">Chưa có dữ liệu audit log.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

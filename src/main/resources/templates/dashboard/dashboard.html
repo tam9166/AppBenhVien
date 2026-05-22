@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Bảng điều khiển tổng quan')}"></head>
+<body>
+<div class="app-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('dashboard')}"></aside>
+    <main class="main-content">
+        <header th:replace="~{fragments/layout :: topbar('Bảng điều khiển tổng quan')}"></header>
+        <section class="content-area">
+            <div class="card card-panel mb-4">
+                <div class="card-body">
+                    <form method="get" th:action="@{/dashboard}" class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Năm thống kê</label>
+                            <select class="form-select" name="year">
+                                <option th:each="item : ${yearOptions}" th:value="${item}" th:text="${item}" th:selected="${item == stats.selectedYear}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Tháng trọng tâm</label>
+                            <select class="form-select" name="month">
+                                <option th:each="item : ${monthOptions}" th:value="${item}" th:text="${'Tháng ' + item}" th:selected="${item == stats.selectedMonth}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-medical w-100">Áp dụng bộ lọc</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6 col-xl-3"><div class="stats-card"><span class="stats-label">Tổng số vật tư</span><h2 th:text="${stats.totalSupplies}">0</h2></div></div>
+                <div class="col-md-6 col-xl-3"><div class="stats-card"><span class="stats-label">Tổng số thuốc</span><h2 th:text="${stats.totalDrugs}">0</h2></div></div>
+                <div class="col-md-6 col-xl-3"><div class="stats-card warning"><span class="stats-label">Sắp hết hạn</span><h2 th:text="${stats.expiringSoon}">0</h2></div></div>
+                <div class="col-md-6 col-xl-3"><div class="stats-card danger"><span class="stats-label">Dưới mức tồn</span><h2 th:text="${stats.lowStock}">0</h2></div></div>
+                <div class="col-md-6 col-xl-3"><div class="stats-card"><span class="stats-label">Cảnh báo đang mở</span><h2 th:text="${stats.activeAlerts}">0</h2></div></div>
+                <div class="col-md-6 col-xl-3"><div class="stats-card"><span class="stats-label">Phiếu nhập tháng chọn</span><h2 th:text="${stats.inboundReceiptCount}">0</h2></div></div>
+                <div class="col-md-6 col-xl-3"><div class="stats-card"><span class="stats-label">Phiếu xuất tháng chọn</span><h2 th:text="${stats.outboundReceiptCount}">0</h2></div></div>
+                <div class="col-md-6 col-xl-3"><div class="stats-card"><span class="stats-label">Giá trị tồn kho</span><h2 th:text="${#numbers.formatDecimal(stats.totalInventoryValue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</h2></div></div>
+                <div class="col-md-6 col-xl-3"><div class="stats-card"><span class="stats-label">Phiếu nhập hôm nay</span><h2 th:text="${stats.todayInboundReceiptCount}">0</h2></div></div>
+                <div class="col-md-6 col-xl-3"><div class="stats-card"><span class="stats-label">Phiếu xuất hôm nay</span><h2 th:text="${stats.todayOutboundReceiptCount}">0</h2></div></div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-xl-8">
+                    <div class="card card-panel">
+                        <div class="card-body">
+                            <h5 class="card-title mb-1">Biểu đồ nhập/xuất theo tháng</h5>
+                            <p class="text-muted mb-3">Xu hướng theo năm <span th:text="${stats.selectedYear}"></span></p>
+                            <canvas id="dashboardChart" th:attr="data-labels=${stats.chartLabels},data-inbound=${stats.inboundChartData},data-outbound=${stats.outboundChartData}"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4">
+                    <div class="card card-panel">
+                        <div class="card-body">
+                            <h5 class="card-title mb-1">Phân bổ theo loại vật tư</h5>
+                            <p class="text-muted mb-3">Cơ cấu tồn hiện tại</p>
+                            <canvas id="categoryChart" th:attr="data-labels=${stats.categoryChartLabels},data-values=${stats.categoryChartData}"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-xl-4">
+                    <div class="card card-panel">
+                        <div class="card-body">
+                            <h5 class="card-title">Top sắp hết</h5>
+                            <div th:if="${#lists.isEmpty(stats.topLowStockSupplies)}" class="empty-state">Chưa có mục nào cần nhập gấp.</div>
+                            <div th:each="item : ${stats.topLowStockSupplies}" class="alert-list-item">
+                                <div><strong th:text="${item.name}">Tên</strong><div class="small text-muted" th:text="${item.code + ' - Tối thiểu: ' + item.minimumStock}">code</div></div>
+                                <span class="badge text-bg-warning" th:text="${item.quantity}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4">
+                    <div class="card card-panel">
+                        <div class="card-body">
+                            <h5 class="card-title">Top sắp hết hạn</h5>
+                            <div th:if="${#lists.isEmpty(stats.topExpiringSupplies)}" class="empty-state">Chưa có vật tư gần hết hạn.</div>
+                            <div th:each="item : ${stats.topExpiringSupplies}" class="alert-list-item">
+                                <div><strong th:text="${item.name}">Tên</strong><div class="small text-muted" th:text="${item.code}">code</div></div>
+                                <span class="badge text-bg-danger" th:text="${item.expiryDate}">2026-12-31</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4">
+                    <div class="card card-panel">
+                        <div class="card-body">
+                            <h5 class="card-title">Top dùng nhiều 30 ngày</h5>
+                            <div th:if="${#lists.isEmpty(stats.topUsedSupplies)}" class="empty-state">Chưa có dữ liệu xuất kho.</div>
+                            <div th:each="item, stat : ${stats.topUsedSupplies}" class="alert-list-item">
+                                <div><strong th:text="${item.supplyName}">Tên</strong><div class="small text-muted">Top <span th:text="${stat.index + 1}">1</span></div></div>
+                                <span class="badge text-bg-primary" th:text="${item.totalQuantity}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card card-panel mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-4">
+                        <div>
+                            <h5 class="card-title mb-1">Chatbot và điều hướng bệnh nhân</h5>
+                            <p class="text-muted mb-0">Theo dõi câu hỏi, phiếu sàng lọc, lịch khám và thông báo mới từ cổng bệnh nhân.</p>
+                        </div>
+                        <a class="btn btn-outline-primary btn-sm" th:href="@{/patient}">Mở cổng bệnh nhân</a>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3"><div class="stats-card"><span class="stats-label">Tổng câu hỏi chatbot</span><h2 th:text="${chatbotTotal}">0</h2></div></div>
+                        <div class="col-md-3"><div class="stats-card danger"><span class="stats-label">Câu hỏi cấp cứu</span><h2 th:text="${chatbotEmergencyCount}">0</h2></div></div>
+                        <div class="col-md-3"><div class="stats-card"><span class="stats-label">Lịch hẹn hôm nay</span><h2 th:text="${appointmentsToday}">0</h2></div></div>
+                        <div class="col-md-3"><div class="stats-card warning"><span class="stats-label">Phiếu sàng lọc cấp cứu</span><h2 th:text="${screeningEmergencyCount}">0</h2></div></div>
+                        <div class="col-md-3"><div class="stats-card"><span class="stats-label">Lịch hẹn chờ xử lý</span><h2 th:text="${pendingAppointments}">0</h2></div></div>
+                        <div class="col-md-3"><div class="stats-card danger"><span class="stats-label">Thông báo lịch hẹn mới</span><h2 th:text="${appointmentNotificationCount}">0</h2></div></div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-xl-4">
+                            <h6>Khoa được chatbot gợi ý nhiều</h6>
+                            <div th:if="${#maps.isEmpty(chatbotDepartmentStats)}" class="empty-state">Chưa có dữ liệu chatbot.</div>
+                            <div th:each="entry : ${chatbotDepartmentStats}" class="alert-list-item">
+                                <strong th:text="${entry.key}">Khoa</strong>
+                                <span class="badge text-bg-primary" th:text="${entry.value}">0</span>
+                            </div>
+                        </div>
+                        <div class="col-xl-4">
+                            <h6>Lịch hẹn mới nhất</h6>
+                            <div th:if="${#lists.isEmpty(recentAppointments)}" class="empty-state">Chưa có lịch hẹn.</div>
+                            <div th:each="appointment : ${recentAppointments}" class="alert-list-item">
+                                <div>
+                                    <strong th:text="${appointment.patientName}">Người bệnh</strong>
+                                    <div class="small text-muted" th:text="${appointment.department + ' - ' + appointment.appointmentDate}">Khoa</div>
+                                </div>
+                                <span class="badge text-bg-info" th:text="${appointment.status}">PENDING</span>
+                            </div>
+                        </div>
+                        <div class="col-xl-4">
+                            <h6>Phiếu sàng lọc gần nhất</h6>
+                            <div th:if="${#lists.isEmpty(recentScreeningTickets)}" class="empty-state">Chưa có phiếu sàng lọc.</div>
+                            <div th:each="ticket : ${recentScreeningTickets}" class="alert-list-item">
+                                <div><strong th:text="${ticket.suggestedDepartment}">Khoa</strong><div class="small text-muted" th:text="${ticket.riskLevel}">Mức độ</div></div>
+                                <span class="badge" th:classappend="${ticket.emergency} ? ' text-bg-danger' : ' text-bg-primary'" th:text="${ticket.riskScore}">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mt-1">
+                        <div class="col-12">
+                            <div class="border rounded-3 p-3">
+                                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                                    <div>
+                                        <h6 class="mb-1">Thông báo lịch khám mới</h6>
+                                        <p class="small text-muted mb-0">Các lịch hẹn vừa được bệnh nhân đăng ký từ cổng công khai.</p>
+                                    </div>
+                                    <span class="badge text-bg-light text-danger" th:text="${appointmentNotificationCount + ' mới'}">0 mới</span>
+                                </div>
+                                <div th:if="${#lists.isEmpty(recentAppointmentNotifications)}" class="empty-state">Chưa có thông báo lịch khám mới.</div>
+                                <div th:each="alert : ${recentAppointmentNotifications}" class="alert-list-item">
+                                    <div>
+                                        <strong th:text="${alert.title}">Thông báo</strong>
+                                        <div class="small text-muted" th:text="${alert.message}">Nội dung</div>
+                                    </div>
+                                    <span class="badge text-bg-danger" th:text="${#temporals.format(alert.lastDetectedAt, 'dd/MM HH:mm')}">10/05</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card card-panel mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-4">
+                        <div>
+                            <h5 class="card-title mb-1">Trợ lý AI cho kho vật tư</h5>
+                            <p class="text-muted mb-0">Tra cứu nhanh dữ liệu kho, cảnh báo tồn và hạn dùng ngay trên hệ thống.</p>
+                        </div>
+                        <span class="badge text-bg-light text-primary">Dữ liệu nội bộ</span>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-lg-7">
+                            <form id="assistantForm" class="assistant-form">
+                                <label class="form-label fw-semibold" for="assistantMessage">Câu hỏi cho trợ lý</label>
+                                <textarea id="assistantMessage" class="form-control assistant-textarea" rows="4" placeholder="Ví dụ: Vật tư nào sắp hết hạn? VT001 còn bao nhiêu?"></textarea>
+                                <div class="d-flex flex-wrap gap-2 mt-3 mb-3">
+                                    <button class="btn btn-sm btn-outline-primary assistant-suggestion" type="button" data-message="Vật tư nào sắp hết hạn?">Sắp hết hạn</button>
+                                    <button class="btn btn-sm btn-outline-primary assistant-suggestion" type="button" data-message="Vật tư nào đang dưới mức tồn?">Dưới mức tồn</button>
+                                    <button class="btn btn-sm btn-outline-primary assistant-suggestion" type="button" data-message="Tổng quan kho vật tư hôm nay">Tổng quan kho</button>
+                                    <button class="btn btn-sm btn-outline-primary assistant-suggestion" type="button" data-message="Tra cứu mã VT001">Tra cứu VT001</button>
+                                </div>
+                                <div class="d-flex flex-wrap gap-3 align-items-center">
+                                    <button class="btn btn-medical" type="submit">
+                                        <span class="assistant-submit-label">Gửi yêu cầu</span>
+                                    </button>
+                                    <small class="text-muted">Phản hồi lấy từ dữ liệu hiện có trong hệ thống.</small>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+                                <h6 class="mb-0">Kết quả</h6>
+                                <span id="assistantBadge" class="badge text-bg-light text-primary">Sẵn sàng</span>
+                            </div>
+                            <div id="assistantSummary" class="assistant-summary mb-0">
+                                <div class="empty-state mb-0">Hỏi trợ lý để xem tóm tắt kho, cảnh báo và tra cứu nhanh theo mã vật tư.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-4">
+                    <div class="card card-panel">
+                        <div class="card-body">
+                            <h5 class="card-title">Cảnh báo chủ động</h5>
+                            <div th:if="${#lists.isEmpty(stats.recentAlerts)}" class="empty-state">Chưa có cảnh báo mở.</div>
+                            <div th:each="alert : ${stats.recentAlerts}" class="alert-list-item">
+                                <div>
+                                    <strong th:text="${alert.title}">Cảnh báo</strong>
+                                    <div class="small text-muted" th:text="${alert.message}">Mô tả</div>
+                                </div>
+                                <span class="badge text-bg-danger" th:text="${alert.referenceCode}">REF</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4">
+                    <div class="card card-panel">
+                        <div class="card-body">
+                            <h5 class="card-title">Dự báo tồn kho</h5>
+                            <div th:if="${#lists.isEmpty(supplyForecasts)}" class="empty-state">Chưa có dữ liệu dự báo.</div>
+                            <div th:each="row : ${supplyForecasts}" class="alert-list-item">
+                                <div>
+                                    <strong th:text="${row['name']}">Vật tư</strong>
+                                    <div class="small text-muted">TB/ngày: <span th:text="${row['dailyAverage']}">1</span> - Còn khoảng <span th:text="${row['remainingDays']}">0</span> ngày</div>
+                                </div>
+                                <span class="badge text-bg-warning" th:text="${row['quantity']}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4">
+                    <div class="card card-panel">
+                        <div class="card-body">
+                            <h5 class="card-title">Lịch hạn dùng</h5>
+                            <div th:if="${#lists.isEmpty(expiryCalendar)}" class="empty-state">Chưa có vật tư cần theo dõi hạn dùng.</div>
+                            <div th:each="item : ${expiryCalendar}" class="alert-list-item">
+                                <div><strong th:text="${item.name}">Vật tư</strong><div class="small text-muted" th:text="${item.code}">Mã</div></div>
+                                <span class="badge text-bg-danger" th:text="${item.expiryDate}">Ngày</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="card card-panel">
+                        <div class="card-body">
+                            <h5 class="card-title">Gợi ý vật tư theo khoa</h5>
+                            <div th:if="${#lists.isEmpty(departmentSupplyRecommendations)}" class="empty-state">Chưa có gợi ý theo khoa.</div>
+                            <div th:each="item : ${departmentSupplyRecommendations}" class="alert-list-item">
+                                <div><strong th:text="${item.department + ' - ' + item.supplyCode}">Khoa</strong><div class="small text-muted" th:text="${item.reason}">Lý do</div></div>
+                                <span class="badge text-bg-primary" th:text="${item.priority}">1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="card card-panel">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title mb-0">Nhật ký thao tác gần nhất</h5>
+                                <a class="small fw-semibold text-decoration-none" th:href="@{/audit-logs}">Xem chi tiết</a>
+                            </div>
+                            <p class="small text-muted mb-3">Chỉ hiển thị hoạt động trong 1 tháng gần nhất.</p>
+                            <div th:if="${#lists.isEmpty(stats.recentAuditLogs)}" class="empty-state">Chưa có lịch sử thao tác trong 1 tháng gần đây.</div>
+                            <div th:if="${!#lists.isEmpty(stats.recentAuditLogs)}" class="compact-log-list">
+                                <div th:each="log : ${stats.recentAuditLogs}" class="compact-log-item">
+                                    <div class="compact-log-main">
+                                        <strong th:text="${log.action}">ACTION</strong>
+                                        <div class="small text-muted" th:text="${log.username + ' - ' + log.description}">Mô tả</div>
+                                    </div>
+                                    <span class="badge text-bg-primary" th:text="${#temporals.format(log.createdAt, 'dd/MM HH:mm')}">10/05</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

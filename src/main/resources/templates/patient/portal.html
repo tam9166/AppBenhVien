@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Cổng bệnh nhân')}"></head>
+<body class="home-page">
+<div class="container py-4 py-lg-5">
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm rounded-4 px-3 px-lg-4 mb-4">
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" th:href="@{/}">
+            <span class="brand-icon-sm"><i class="bi bi-hospital"></i></span>
+            <span>Bệnh viện Ung bướu Đà Nẵng</span>
+        </a>
+        <div class="ms-auto d-flex gap-2 flex-wrap">
+            <a class="btn btn-outline-primary" th:href="@{/patient/departments}">Khoa phòng</a>
+            <a class="btn btn-outline-primary" th:href="@{/patient/prices}">Bảng giá</a>
+            <a class="btn btn-outline-primary" th:href="@{/patient/appointments/lookup}">Tra cứu lịch</a>
+            <a class="btn btn-medical" th:href="@{/patient/appointments/new}">Đặt lịch khám</a>
+        </div>
+    </nav>
+
+    <section class="row g-4 mb-4">
+        <div class="col-lg-7">
+            <div class="card card-panel h-100">
+                <div class="card-body p-4 p-lg-5">
+                    <span class="badge text-bg-light text-primary mb-3">Cổng bệnh nhân</span>
+                    <h1 class="display-6 fw-bold mb-3">Đặt lịch, tra cứu khoa phòng và tạo phiếu sàng lọc nhanh.</h1>
+                    <p class="text-muted mb-4">Chatbot hỗ trợ định hướng khoa khám ban đầu, sau đó người bệnh có thể tạo phiếu sàng lọc hoặc đặt lịch bằng QR. Mọi lịch hẹn mới đều được chuyển sang trang quản trị để bệnh viện nắm tình hình.</p>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a class="btn btn-medical btn-lg" th:href="@{/patient/appointments/new}">Đặt lịch khám</a>
+                        <a class="btn btn-outline-primary btn-lg" th:href="@{/patient/screening-packages}">Gói tầm soát</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card card-panel h-100">
+                <div class="card-body p-4">
+                    <h4 class="mb-3">Tạo phiếu sàng lọc từ triệu chứng</h4>
+                    <form th:action="@{/patient/screening-ticket}" method="post">
+                        <textarea class="form-control assistant-textarea mb-3" name="message" rows="6" placeholder="Ví dụ: Tôi đau ngực, khó thở và vã mồ hôi"></textarea>
+                        <button class="btn btn-medical w-100" type="submit">Tạo phiếu sàng lọc</button>
+                    </form>
+                    <p class="small text-muted mt-3 mb-0">Phiếu chỉ hỗ trợ điều hướng ban đầu, không thay thế chẩn đoán của bác sĩ.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="row g-4">
+        <div class="col-md-4" th:each="department : ${departments}">
+            <div class="card card-panel h-100">
+                <div class="card-body">
+                    <h5 th:text="${department.name}">Khoa</h5>
+                    <p class="text-muted mb-2" th:text="${department.location}">Vị trí</p>
+                    <p class="small mb-0" th:text="${department.description}">Mô tả</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+<script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

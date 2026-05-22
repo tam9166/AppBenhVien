@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Báo cáo thống kê')}"></head>
+<body>
+<div class="app-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('reports')}"></aside>
+    <main class="main-content">
+        <header th:replace="~{fragments/layout :: topbar('Báo cáo thống kê')}"></header>
+        <section class="content-area">
+            <div class="row g-4">
+                <div class="col-xl-8">
+                    <div class="card card-panel">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                                <div>
+                                    <h5 class="card-title">Xu hướng nhập và xuất kho năm <span th:text="${year}"></span></h5>
+                                    <p class="text-muted mb-0">Biểu đồ điều hành cho quản trị và kế toán</p>
+                                </div>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <a th:href="@{/reports/excel}" class="btn btn-outline-success">Xuất Excel vật tư</a>
+                                    <a th:href="@{/reports/pdf}" class="btn btn-outline-danger">Xuất PDF vật tư</a>
+                                    <a th:href="@{/reports/stock-movements/excel}" class="btn btn-outline-success">Excel biến động</a>
+                                    <a th:href="@{/reports/stock-movements/pdf}" class="btn btn-outline-danger">PDF biến động</a>
+                                </div>
+                            </div>
+                            <canvas id="reportChart"
+                                    th:attr="data-inbound=${inboundStats},data-outbound=${outboundStats}"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4">
+                    <div class="card card-panel">
+                        <div class="card-body">
+                            <h5 class="card-title">Top vật tư sử dụng nhiều</h5>
+                            <div th:each="item, stat : ${topUsedSupplies}" class="top-used-item">
+                                <div>
+                                    <div class="fw-semibold" th:text="${item.supplyName}">Tên vật tư</div>
+                                    <small class="text-muted">Top <span th:text="${stat.index + 1}">1</span></small>
+                                </div>
+                                <span class="badge text-bg-primary" th:text="${item.totalQuantity}">0</span>
+                            </div>
+                            <div th:if="${#lists.isEmpty(topUsedSupplies)}" class="empty-state">Chưa có dữ liệu xuất kho.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="card card-panel">
+                        <div class="card-body">
+                            <h5 class="card-title">Nhật ký biến động kho gần đây</h5>
+                            <div class="table-responsive">
+                                <table class="table table-modern">
+                                    <thead>
+                                    <tr><th>Ngày</th><th>Mã</th><th>Tên vật tư</th><th>Loại</th><th>Biến động</th><th>Tồn sau</th><th>Chứng từ</th></tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="movement : ${recentStockMovements}">
+                                        <td th:text="${movement.movementDate}"></td>
+                                        <td th:text="${movement.supplyCode}"></td>
+                                        <td th:text="${movement.supplyName}"></td>
+                                        <td th:text="${movement.movementType}"></td>
+                                        <td th:text="${movement.quantityChange}"></td>
+                                        <td th:text="${movement.quantityAfterChange}"></td>
+                                        <td th:text="${movement.referenceCode}"></td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(recentStockMovements)}"><td colspan="7" class="text-center text-muted py-4">Chưa có biến động kho nào.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

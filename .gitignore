@@ -1,0 +1,28 @@
+# Build outputs
+target/
+*.class
+
+# Runtime logs
+*.log
+app-run*.log
+cloudflared*.log
+
+# Local environment and IDE files
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# Local tunneling tools
+tools/*.exe

@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Quản lý vật tư y tế')}"></head>
+<body>
+<div class="app-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('inventory')}"></aside>
+    <main class="main-content">
+        <header th:replace="~{fragments/layout :: topbar('Quản lý vật tư y tế')}"></header>
+        <section class="content-area">
+            <div class="card card-panel">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center mb-4">
+                        <form class="d-flex gap-2" method="get" th:action="@{/medical-supplies}">
+                            <input type="text" class="form-control" name="keyword" th:value="${keyword}" placeholder="Tìm theo mã, tên, loại, nhà cung cấp">
+                            <button type="submit" class="btn btn-outline-primary">Tìm kiếm</button>
+                        </form>
+                        <a class="btn btn-medical" th:href="@{/medical-supplies/create}"><i class="bi bi-plus-circle"></i> Thêm vật tư</a>
+                    </div>
+
+                    <div th:if="${param.success != null}" class="alert alert-success">Lưu vật tư thành công.</div>
+                    <div th:if="${param.deleted != null or deleteSuccess != null}" class="alert alert-success" th:text="${deleteSuccess != null ? deleteSuccess : 'Xóa vật tư thành công.'}">Xóa vật tư thành công.</div>
+                    <div th:if="${deleteError != null}" class="alert alert-warning" th:text="${deleteError}">Không thể xóa vật tư.</div>
+
+                    <div class="table-responsive">
+                        <table class="table table-modern align-middle">
+                            <thead>
+                            <tr>
+                                <th>Mã</th>
+                                <th>Tên vật tư</th>
+                                <th>Loại</th>
+                                <th>Số lượng</th>
+                                <th>Đơn vị</th>
+                                <th>Hạn dùng</th>
+                                <th>Nhà cung cấp</th>
+                                <th>QR</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="item : ${supplyPage.content}">
+                                <td th:text="${item.code}">VT001</td>
+                                <td>
+                                    <div class="fw-semibold" th:text="${item.name}">Tên vật tư</div>
+                                    <div class="small text-muted" th:text="${item.category != null ? item.category.name : ''}">Loại</div>
+                                </td>
+                                <td th:text="${item.category != null ? item.category.name : ''}">Loại</td>
+                                <td th:text="${item.quantity}">0</td>
+                                <td th:text="${item.unit}">Hộp</td>
+                                <td th:text="${item.expiryDate}">2026-12-31</td>
+                                <td th:text="${item.supplier != null ? item.supplier.name : ''}">ABC</td>
+                                <td>
+                                    <img th:src="@{'/qr/image/' + ${item.id}}" alt="QR" class="qr-thumb">
+                                </td>
+                                <td>
+                                    <span class="badge text-bg-success" th:if="${item.status != null and item.status.name() == 'AVAILABLE'}" th:text="${item.status}">AVAILABLE</span>
+                                    <span class="badge text-bg-warning" th:if="${item.status != null and item.status.name() == 'LOW_STOCK'}" th:text="${item.status}">LOW_STOCK</span>
+                                    <span class="badge text-bg-danger" th:if="${item.status != null and item.status.name() == 'EXPIRING_SOON'}" th:text="${item.status}">EXPIRING_SOON</span>
+                                    <span class="badge text-bg-secondary" th:if="${item.status != null and item.status.name() != 'AVAILABLE' and item.status.name() != 'LOW_STOCK' and item.status.name() != 'EXPIRING_SOON'}" th:text="${item.status}">OTHER</span>
+                                    <span class="badge text-bg-secondary" th:if="${item.status == null}">UNKNOWN</span>
+                                </td>
+                                <td class="text-nowrap">
+                                    <a class="btn btn-sm btn-outline-primary" th:href="@{'/medical-supplies/edit/' + ${item.id}}">Sửa</a>
+                                    <a class="btn btn-sm btn-outline-secondary" th:href="@{'/medical-supplies/' + ${item.id} + '/batches'}">Lô hàng</a>
+                                    <a class="btn btn-sm btn-outline-info" th:href="@{'/qr/info/' + ${item.qrCode}}">Xem QR</a>
+                                    <a sec:authorize="hasRole('ADMIN')"
+                                       class="btn btn-sm btn-outline-danger"
+                                       th:href="@{'/medical-supplies/delete/' + ${item.id}}"
+                                       onclick="return confirm('Bạn có chắc chắn muốn xóa vật tư này? Hệ thống sẽ từ chối nếu vật tư đã phát sinh nhập kho, xuất kho hoặc lô hàng.')">Xóa</a>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(supplyPage.content)}">
+                                <td colspan="10" class="text-center text-muted py-4">Chưa có dữ liệu vật tư.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <nav th:if="${supplyPage.totalPages > 0}" class="mt-3">
+                        <ul class="pagination justify-content-end">
+                            <li class="page-item" th:classappend="${supplyPage.first} ? 'disabled'">
+                                <a class="page-link" th:href="@{/medical-supplies(page=${supplyPage.number - 1}, keyword=${keyword})}">Trước</a>
+                            </li>
+                            <li th:each="i : ${#numbers.sequence(0, supplyPage.totalPages - 1)}"
+                                class="page-item"
+                                th:classappend="${i == supplyPage.number} ? 'active'">
+                                <a class="page-link" th:href="@{/medical-supplies(page=${i}, keyword=${keyword})}" th:text="${i + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${supplyPage.last} ? 'disabled'">
+                                <a class="page-link" th:href="@{/medical-supplies(page=${supplyPage.number + 1}, keyword=${keyword})}">Sau</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
