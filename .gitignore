@@ -26,3 +26,7 @@ Thumbs.db
 
 # Local tunneling tools
 tools/*.exe
+
+# Local project documents
+*.docx
+*.pdf
