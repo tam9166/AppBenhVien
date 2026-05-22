@@ -28,6 +28,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -35,6 +37,7 @@ import java.util.List;
 @RequestMapping("/patient")
 @RequiredArgsConstructor
 public class PublicPortalController {
+    private static final Charset WINDOWS_1252 = Charset.forName("Windows-1252");
 
     private final AppointmentRequestRepository appointmentRequestRepository;
     private final AuditLogRepository auditLogRepository;
@@ -62,7 +65,8 @@ public class PublicPortalController {
             if (screeningTicketId != null) {
                 screeningTicketRepository.findById(screeningTicketId).ifPresent(ticket -> prefillFromTicket(appointment, ticket));
             }
-            model.addAttribute("appointment", appointment);
+            repairAppointmentText(appointment);
+        model.addAttribute("appointment", appointment);
         }
         model.addAttribute("departments", departmentInfoRepository.findAll());
         model.addAttribute("screeningTicketId", screeningTicketId);
@@ -85,14 +89,15 @@ public class PublicPortalController {
         auditLogRepository.save(buildAppointmentAuditLog(saved));
 
         redirectAttributes.addFlashAttribute("successMessage",
-                "Đặt lịch thành công. Vui lòng lưu mã QR để check-in.");
+                "Äáº·t lá»‹ch thÃ nh cÃ´ng. Vui lÃ²ng lÆ°u mÃ£ QR Ä‘á»ƒ check-in.");
         return "redirect:/patient/appointments/" + saved.getId();
     }
 
     @GetMapping("/appointments/{id}")
     public String appointmentDetail(@PathVariable Long id, Model model) {
         AppointmentRequest appointment = appointmentRequestRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy lịch hẹn"));
+                .orElseThrow(() -> new IllegalArgumentException("KhÃ´ng tÃ¬m tháº¥y lá»‹ch háº¹n"));
+        repairAppointmentText(appointment);
         model.addAttribute("appointment", appointment);
         if (appointment.getScreeningTicketId() != null) {
             screeningTicketRepository.findById(appointment.getScreeningTicketId())
@@ -104,7 +109,7 @@ public class PublicPortalController {
     @GetMapping(value = "/appointments/{id}/qr", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<byte[]> appointmentQr(@PathVariable Long id) {
         AppointmentRequest appointment = appointmentRequestRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy lịch hẹn"));
+                .orElseThrow(() -> new IllegalArgumentException("KhÃ´ng tÃ¬m tháº¥y lá»‹ch háº¹n"));
         byte[] image = qrCodeGenerator.generateQrCode("/patient/check-in/" + appointment.getQrCode(), 260, 260);
         return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(image);
     }
@@ -122,7 +127,8 @@ public class PublicPortalController {
     @GetMapping("/check-in/{qrCode}")
     public String checkIn(@PathVariable String qrCode, Model model) {
         AppointmentRequest appointment = appointmentRequestRepository.findByQrCode(qrCode)
-                .orElseThrow(() -> new IllegalArgumentException("Mã QR lịch hẹn không hợp lệ"));
+                .orElseThrow(() -> new IllegalArgumentException("MÃ£ QR lá»‹ch háº¹n khÃ´ng há»£p lá»‡"));
+        repairAppointmentText(appointment);
         model.addAttribute("appointment", appointment);
         return "patient/check-in";
     }
@@ -151,21 +157,21 @@ public class PublicPortalController {
         ScreeningTicket ticket = new ScreeningTicket();
         ticket.setPatientMessage(message);
         ticket.setSuggestedDepartment(response.getDepartment() == null || response.getDepartment().isBlank()
-                ? "Nội tổng quát"
+                ? "Ná»™i tá»•ng quÃ¡t"
                 : response.getDepartment());
         ticket.setRiskScore(response.getRiskScore());
         ticket.setRiskLevel(response.getRiskLevel());
         ticket.setEmergency(response.isEmergency());
         ticket.setSummary(response.getAnswer() + "\n" + response.getAdvice());
         ScreeningTicket saved = screeningTicketRepository.save(ticket);
-        redirectAttributes.addFlashAttribute("successMessage", "Đã tạo phiếu sàng lọc tự động.");
+        redirectAttributes.addFlashAttribute("successMessage", "ÄÃ£ táº¡o phiáº¿u sÃ ng lá»c tá»± Ä‘á»™ng.");
         return "redirect:/patient/screening-ticket/" + saved.getId();
     }
 
     @GetMapping("/screening-ticket/{id}")
     public String screeningTicket(@PathVariable Long id, Model model) {
         ScreeningTicket ticket = screeningTicketRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phiếu sàng lọc"));
+                .orElseThrow(() -> new IllegalArgumentException("KhÃ´ng tÃ¬m tháº¥y phiáº¿u sÃ ng lá»c"));
         model.addAttribute("ticket", ticket);
         return "patient/screening-ticket";
     }
@@ -201,10 +207,57 @@ public class PublicPortalController {
         auditLog.setAction("PATIENT_APPOINTMENT_CREATED");
         auditLog.setTargetType("APPOINTMENT");
         auditLog.setTargetValue(appointment.getQrCode());
-        auditLog.setDescription("Bệnh nhân " + appointment.getPatientName()
-                + " đăng ký lịch khám khoa " + appointment.getDepartment()
-                + " vào " + appointment.getAppointmentDate().format(DateTimeFormatter.ISO_DATE)
+        auditLog.setDescription("Bá»‡nh nhÃ¢n " + appointment.getPatientName()
+                + " Ä‘Äƒng kÃ½ lá»‹ch khÃ¡m khoa " + appointment.getDepartment()
+                + " vÃ o " + appointment.getAppointmentDate().format(DateTimeFormatter.ISO_DATE)
                 + " " + appointment.getAppointmentTime() + ".");
         return auditLog;
     }
+
+    private void repairAppointmentText(AppointmentRequest appointment) {
+        appointment.setDepartment(repairUtf8Deep(appointment.getDepartment()));
+        appointment.setPriorityLevel(repairUtf8Deep(appointment.getPriorityLevel()));
+        appointment.setTriageSummary(repairUtf8Deep(appointment.getTriageSummary()));
+    }
+
+    private String repairUtf8Deep(String value) {
+        if (value == null || value.isBlank()) {
+            return value;
+        }
+        String repaired = value;
+        for (int i = 0; i < 3 && looksMojibake(repaired); i++) {
+            try {
+                repaired = new String(repaired.getBytes(WINDOWS_1252), StandardCharsets.UTF_8);
+            } catch (RuntimeException ex) {
+                break;
+            }
+        }
+        return repairReplacementArtifacts(repaired);
+    }
+
+    private boolean looksMojibake(String value) {
+        return value.contains("Ã")
+                || value.contains("Â")
+                || value.contains("Ä")
+                || value.contains("áº")
+                || value.contains("á»")
+                || value.contains("Æ");
+    }
+
+    private String repairReplacementArtifacts(String value) {
+        return value
+                .replace("nh�m", "nhóm")
+                .replace("b�?nh", "bệnh")
+                .replace("hi�?n", "hiện")
+                .replace("hi�?u", "hiệu")
+                .replace("c�?p", "cấp")
+                .replace("c�?u", "cứu")
+                .replace("d�?u", "dấu")
+                .replace("n�i", "nói")
+                .replace("kh�", "khó")
+                .replace("thay th�", "thay thế")
+                .replace("ch�?n", "chẩn")
+                .replace("đi�?u", "điều");
+    }
 }
+

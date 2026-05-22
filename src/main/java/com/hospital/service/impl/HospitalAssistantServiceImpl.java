@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -32,6 +33,7 @@ import java.util.regex.Pattern;
 public class HospitalAssistantServiceImpl implements HospitalAssistantService {
 
     private static final Pattern SUPPLY_CODE_PATTERN = Pattern.compile("\\b[a-z]{1,5}\\d{2,}\\b", Pattern.CASE_INSENSITIVE);
+    private static final Charset WINDOWS_1252 = Charset.forName("Windows-1252");
     private static final String HOSPITAL_HOURS = "Bá»‡nh viá»‡n khÃ¡m tá»« 7h00 Ä‘áº¿n 17h00 tá»« thá»© 2 Ä‘áº¿n thá»© 7. Khoa Cáº¥p cá»©u hoáº¡t Ä‘á»™ng 24/7.";
     private static final String HOSPITAL_ADDRESS = "Äá»‹a chá»‰ bá»‡nh viá»‡n: 123 Nguyá»…n VÄƒn Linh.";
     private static final String HOSPITAL_HOTLINE = "Hotline há»— trá»£: 1900 1234.";
@@ -693,14 +695,54 @@ public class HospitalAssistantServiceImpl implements HospitalAssistantService {
 
     private AssistantResponse sanitizeResponse(AssistantResponse response) {
         return new AssistantResponse(
-                repairUtf8(response.getType()),
-                repairUtf8(response.getDepartment()),
+                repairUtf8Deep(response.getType()),
+                repairUtf8Deep(response.getDepartment()),
                 response.getRiskScore(),
-                repairUtf8(response.getRiskLevel()),
-                repairUtf8(response.getAnswer()),
-                repairUtf8(response.getAdvice()),
+                repairUtf8Deep(response.getRiskLevel()),
+                repairUtf8Deep(response.getAnswer()),
+                repairUtf8Deep(response.getAdvice()),
                 response.isEmergency()
         );
+    }
+
+    private String repairUtf8Deep(String value) {
+        if (value == null || value.isBlank()) {
+            return value;
+        }
+        String repaired = value;
+        for (int i = 0; i < 3 && looksMojibake(repaired); i++) {
+            try {
+                repaired = new String(repaired.getBytes(WINDOWS_1252), StandardCharsets.UTF_8);
+            } catch (RuntimeException ex) {
+                break;
+            }
+        }
+        return repairReplacementArtifacts(repaired);
+    }
+
+    private boolean looksMojibake(String value) {
+        return value.contains("Ã")
+                || value.contains("Â")
+                || value.contains("Ä")
+                || value.contains("áº")
+                || value.contains("á»")
+                || value.contains("Æ");
+    }
+
+    private String repairReplacementArtifacts(String value) {
+        return value
+                .replace("nh�m", "nhóm")
+                .replace("b�?nh", "bệnh")
+                .replace("hi�?n", "hiện")
+                .replace("hi�?u", "hiệu")
+                .replace("c�?p", "cấp")
+                .replace("c�?u", "cứu")
+                .replace("d�?u", "dấu")
+                .replace("n�i", "nói")
+                .replace("kh�", "khó")
+                .replace("thay th�", "thay thế")
+                .replace("ch�?n", "chẩn")
+                .replace("đi�?u", "điều");
     }
 
     private String repairUtf8(String value) {

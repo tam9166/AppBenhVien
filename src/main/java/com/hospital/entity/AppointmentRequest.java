@@ -36,34 +36,34 @@ public class AppointmentRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Vui lòng nhập họ tên")
+    @NotBlank(message = "Vui lÃ²ng nháº­p há» tÃªn")
     @Column(name = "patient_name", nullable = false, length = 120, columnDefinition = "NVARCHAR(120)")
     private String patientName;
 
-    @NotBlank(message = "Vui lòng nhập số điện thoại")
-    @Pattern(regexp = "^(0|\\+84)\\d{9,10}$", message = "Số điện thoại không hợp lệ")
+    @NotBlank(message = "Vui lÃ²ng nháº­p sá»‘ Ä‘iá»‡n thoáº¡i")
+    @Pattern(regexp = "^(0|\\+84)\\d{9,10}$", message = "Sá»‘ Ä‘iá»‡n thoáº¡i khÃ´ng há»£p lá»‡")
     @Column(name = "phone", nullable = false, length = 30)
     private String phone;
 
-    @Email(message = "Email không hợp lệ")
+    @Email(message = "Email khÃ´ng há»£p lá»‡")
     @Column(name = "email", length = 120)
     private String email;
 
-    @NotBlank(message = "Vui lòng chọn khoa")
+    @NotBlank(message = "Vui lÃ²ng chá»n khoa")
     @Column(name = "department", nullable = false, length = 100, columnDefinition = "NVARCHAR(100)")
     private String department;
 
-    @NotNull(message = "Vui lòng chọn ngày khám")
+    @NotNull(message = "Vui lÃ²ng chá»n ngÃ y khÃ¡m")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "appointment_date", nullable = false)
     private LocalDate appointmentDate;
 
-    @NotNull(message = "Vui lòng chọn giờ khám")
+    @NotNull(message = "Vui lÃ²ng chá»n giá» khÃ¡m")
     @DateTimeFormat(pattern = "HH:mm")
     @Column(name = "appointment_time", nullable = false)
     private LocalTime appointmentTime;
 
-    @Size(max = 1000, message = "Mô tả triệu chứng tối đa 1000 ký tự")
+    @Size(max = 1000, message = "MÃ´ táº£ triá»‡u chá»©ng tá»‘i Ä‘a 1000 kÃ½ tá»±")
     @Column(name = "symptoms", length = 1000, columnDefinition = "NVARCHAR(1000)")
     private String symptoms;
 
@@ -105,19 +105,19 @@ public class AppointmentRequest {
     private LocalDateTime createdAt;
 
     @Transient
-    @AssertTrue(message = "Ngày khám phải từ hôm nay trở đi")
+    @AssertTrue(message = "NgÃ y khÃ¡m pháº£i tá»« hÃ´m nay trá»Ÿ Ä‘i")
     public boolean isAppointmentDateValid() {
         return appointmentDate == null || !appointmentDate.isBefore(LocalDate.now());
     }
 
     @Transient
-    @AssertTrue(message = "Bệnh viện nhận lịch online từ thứ 2 đến thứ 7")
+    @AssertTrue(message = "Bá»‡nh viá»‡n nháº­n lá»‹ch online tá»« thá»© 2 Ä‘áº¿n thá»© 7")
     public boolean isAppointmentDayAllowed() {
         return appointmentDate == null || appointmentDate.getDayOfWeek() != DayOfWeek.SUNDAY;
     }
 
     @Transient
-    @AssertTrue(message = "Giờ khám phải trong khung 07:00 - 16:30")
+    @AssertTrue(message = "Giá» khÃ¡m pháº£i trong khung 07:00 - 16:30")
     public boolean isAppointmentTimeValid() {
         if (appointmentTime == null) {
             return true;
@@ -140,3 +140,4 @@ public class AppointmentRequest {
         }
     }
 }
+
