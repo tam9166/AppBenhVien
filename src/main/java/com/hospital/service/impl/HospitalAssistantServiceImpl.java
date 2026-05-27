@@ -709,10 +709,11 @@ public class HospitalAssistantServiceImpl implements HospitalAssistantService {
         if (value == null || value.isBlank()) {
             return value;
         }
-        String repaired = value;
-        for (int i = 0; i < 3 && looksMojibake(repaired); i++) {
+        String repaired = repairReplacementArtifacts(value);
+        for (int i = 0; i < 3 && hasEncodingArtifacts(repaired); i++) {
             try {
                 repaired = new String(repaired.getBytes(WINDOWS_1252), StandardCharsets.UTF_8);
+                repaired = repairReplacementArtifacts(repaired);
             } catch (RuntimeException ex) {
                 break;
             }
@@ -720,38 +721,53 @@ public class HospitalAssistantServiceImpl implements HospitalAssistantService {
         return repairReplacementArtifacts(repaired);
     }
 
-    private boolean looksMojibake(String value) {
+    private boolean hasEncodingArtifacts(String value) {
         return value.contains("Ã")
                 || value.contains("Â")
                 || value.contains("Ä")
                 || value.contains("áº")
                 || value.contains("á»")
-                || value.contains("Æ")
-                || value.contains("\uFFFD");
+                || value.contains("Æ");
+    }
+
+    private boolean looksMojibake(String value) {
+        return hasEncodingArtifacts(value) || value.contains("\uFFFD");
     }
 
     private String repairReplacementArtifacts(String value) {
         return value
                 .replace("nghi ng\uFFFD?", "nghi ng\u1edd")
+                .replace("nghi ng\uFFFD", "nghi ng\u1edd")
                 .replace("s\u00e0ng l\uFFFD?c", "s\u00e0ng l\u1ecdc")
+                .replace("s\u00e0ng l\uFFFDc", "s\u00e0ng l\u1ecdc")
                 .replace("T?ng", "T\u1ea7ng")
                 .replace("t? th? 2 ??n th? 7", "t\u1eeb th\u1ee9 2 \u0111\u1ebfn th\u1ee9 7")
+                .replace("t? th?", "t\u1eeb th\u1ee9")
+                .replace("??n", "\u0111\u1ebfn")
                 .replace("gio tiep nhan", "gi\u1edd ti\u1ebfp nh\u1eadn")
                 .replace("Vi tri goi y", "V\u1ecb tr\u00ed g\u1ee3i \u00fd")
                 .replace("Luu y: thong tin nay chi ho tro sang loc so bo, khong thay the chan doan hoac chi dinh dieu tri cua bac si.",
                         "L\u01b0u \u00fd: th\u00f4ng tin n\u00e0y ch\u1ec9 h\u1ed7 tr\u1ee3 s\u00e0ng l\u1ecdc s\u01a1 b\u1ed9, kh\u00f4ng thay th\u1ebf ch\u1ea9n \u0111o\u00e1n ho\u1eb7c ch\u1ec9 \u0111\u1ecbnh \u0111i\u1ec1u tr\u1ecb c\u1ee7a b\u00e1c s\u0129.")
                 .replace("nh\uFFFDm", "nh\u00f3m")
                 .replace("b\uFFFD?nh", "b\u1ec7nh")
+                .replace("b\uFFFDnh", "b\u1ec7nh")
                 .replace("hi\uFFFD?n", "hi\u1ec7n")
+                .replace("hi\uFFFDn", "hi\u1ec7n")
                 .replace("hi\uFFFD?u", "hi\u1ec7u")
+                .replace("hi\uFFFDu", "hi\u1ec7u")
                 .replace("c\uFFFD?p", "c\u1ea5p")
+                .replace("c\uFFFDp", "c\u1ea5p")
                 .replace("c\uFFFD?u", "c\u1ee9u")
+                .replace("c\uFFFDu", "c\u1ee9u")
                 .replace("d\uFFFD?u", "d\u1ea5u")
+                .replace("d\uFFFDu", "d\u1ea5u")
                 .replace("n\uFFFDi", "n\u00f3i")
                 .replace("kh\uFFFD", "kh\u00f3")
                 .replace("thay th\uFFFD", "thay th\u1ebf")
                 .replace("ch\uFFFD?n", "ch\u1ea9n")
-                .replace("\u0111i\uFFFD?u", "\u0111i\u1ec1u");
+                .replace("ch\uFFFDn", "ch\u1ea9n")
+                .replace("\u0111i\uFFFD?u", "\u0111i\u1ec1u")
+                .replace("\u0111i\uFFFDu", "\u0111i\u1ec1u");
     }
     private String repairUtf8(String value) {
         if (value == null || value.isBlank()) {
