@@ -62,11 +62,11 @@ public class HospitalAssistantServiceImpl implements HospitalAssistantService {
                     "FAQ",
                     "",
                     0,
-                    "nháº¹",
-                    "Vui lÃ²ng nháº­p cÃ¢u há»i hoáº·c mÃ´ táº£ triá»‡u chá»©ng Ä‘á»ƒ tÃ´i há»— trá»£.",
+                    "nh\u1eb9",
+                    "Vui l\u00f2ng nh\u1eadp c\u00e2u h\u1ecfi ho\u1eb7c m\u00f4 t\u1ea3 tri\u1ec7u ch\u1ee9ng \u0111\u1ec3 t\u00f4i h\u1ed7 tr\u1ee3.",
                     authenticated
-                            ? "Báº¡n cÃ³ thá»ƒ há»i vá» giá» khÃ¡m, Ä‘á»‹a chá»‰, hotline, khoa khÃ¡m, váº­t tÆ° sáº¯p háº¿t háº¡n hoáº·c mÃ´ táº£ triá»‡u chá»©ng."
-                            : "Báº¡n cÃ³ thá»ƒ há»i vá» giá» khÃ¡m, Ä‘á»‹a chá»‰, hotline hoáº·c mÃ´ táº£ triá»‡u chá»©ng Ä‘á»ƒ Ä‘Æ°á»£c sÃ ng lá»c sÆ¡ bá»™.",
+                            ? "B\u1ea1n c\u00f3 th\u1ec3 h\u1ecfi v\u1ec1 gi\u1edd kh\u00e1m, \u0111\u1ecba ch\u1ec9, hotline, khoa kh\u00e1m, v\u1eadt t\u01b0 s\u1eafp h\u1ebft h\u1ea1n ho\u1eb7c m\u00f4 t\u1ea3 tri\u1ec7u ch\u1ee9ng."
+                            : "B\u1ea1n c\u00f3 th\u1ec3 h\u1ecfi v\u1ec1 gi\u1edd kh\u00e1m, \u0111\u1ecba ch\u1ec9, hotline ho\u1eb7c m\u00f4 t\u1ea3 tri\u1ec7u ch\u1ee9ng \u0111\u1ec3 \u0111\u01b0\u1ee3c s\u00e0ng l\u1ecdc s\u01a1 b\u1ed9.",
                     false
             );
         }
@@ -677,8 +677,8 @@ public class HospitalAssistantServiceImpl implements HospitalAssistantService {
         private String normalize(String input) {
         String normalized = Normalizer.normalize(repairUtf8(input), Normalizer.Form.NFD)
                 .replaceAll("\\p{M}+", "")
-                .replace('đ', 'd')
-                .replace('đ', 'd')
+                .replace('\u0111', 'd')
+                .replace('\u0110', 'd')
                 .toLowerCase(Locale.ROOT);
 
         StringBuilder clean = new StringBuilder();

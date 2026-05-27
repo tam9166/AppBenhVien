@@ -153,18 +153,22 @@ public class PublicPortalController {
 
     @PostMapping("/screening-ticket")
     public String createScreeningTicket(@RequestParam String message, RedirectAttributes redirectAttributes) {
-        AssistantResponse response = hospitalAssistantService.analyze(message, false);
+        if (message == null || message.trim().isBlank()) {
+            redirectAttributes.addFlashAttribute("successMessage", "Vui l\u00f2ng nh\u1eadp tri\u1ec7u ch\u1ee9ng tr\u01b0\u1edbc khi t\u1ea1o phi\u1ebfu s\u00e0ng l\u1ecdc.");
+            return "redirect:/patient";
+        }
+        AssistantResponse response = hospitalAssistantService.analyze(message.trim(), false);
         ScreeningTicket ticket = new ScreeningTicket();
-        ticket.setPatientMessage(message);
+        ticket.setPatientMessage(message.trim());
         ticket.setSuggestedDepartment(response.getDepartment() == null || response.getDepartment().isBlank()
-                ? "Ná»™i tá»•ng quÃ¡t"
-                : response.getDepartment());
+                ? "N\u1ed9i t\u1ed5ng qu\u00e1t"
+                : repairUtf8Deep(response.getDepartment()));
         ticket.setRiskScore(response.getRiskScore());
-        ticket.setRiskLevel(response.getRiskLevel());
+        ticket.setRiskLevel(repairUtf8Deep(response.getRiskLevel()));
         ticket.setEmergency(response.isEmergency());
-        ticket.setSummary(response.getAnswer() + "\n" + response.getAdvice());
+        ticket.setSummary(repairUtf8Deep(response.getAnswer() + "\n" + response.getAdvice()));
         ScreeningTicket saved = screeningTicketRepository.save(ticket);
-        redirectAttributes.addFlashAttribute("successMessage", "ÄÃ£ táº¡o phiáº¿u sÃ ng lá»c tá»± Ä‘á»™ng.");
+        redirectAttributes.addFlashAttribute("successMessage", "\u0110\u00e3 t\u1ea1o phi\u1ebfu s\u00e0ng l\u1ecdc t\u1ef1 \u0111\u1ed9ng.");
         return "redirect:/patient/screening-ticket/" + saved.getId();
     }
 
@@ -223,6 +227,15 @@ public class PublicPortalController {
     }
 
     private void repairScreeningTicketText(ScreeningTicket ticket) {
+        if ((ticket.getPatientMessage() == null || ticket.getPatientMessage().isBlank())
+                && ticket.getSummary() != null
+                && ticket.getSummary().contains("?")) {
+            ticket.setSuggestedDepartment("N\u1ed9i t\u1ed5ng qu\u00e1t");
+            ticket.setRiskLevel("nh\u1eb9");
+            ticket.setSummary("Vui l\u00f2ng nh\u1eadp c\u00e2u h\u1ecfi ho\u1eb7c m\u00f4 t\u1ea3 tri\u1ec7u ch\u1ee9ng \u0111\u1ec3 t\u00f4i h\u1ed7 tr\u1ee3.\n"
+                    + "B\u1ea1n c\u00f3 th\u1ec3 h\u1ecfi v\u1ec1 gi\u1edd kh\u00e1m, \u0111\u1ecba ch\u1ec9, hotline ho\u1eb7c m\u00f4 t\u1ea3 tri\u1ec7u ch\u1ee9ng \u0111\u1ec3 \u0111\u01b0\u1ee3c s\u00e0ng l\u1ecdc s\u01a1 b\u1ed9.");
+            return;
+        }
         ticket.setSuggestedDepartment(repairUtf8Deep(ticket.getSuggestedDepartment()));
         ticket.setRiskLevel(repairUtf8Deep(ticket.getRiskLevel()));
         ticket.setSummary(repairUtf8Deep(ticket.getSummary()));
