@@ -240,6 +240,8 @@ public class DemoDataInitializer implements CommandLineRunner {
         jdbcTemplate.execute("IF COL_LENGTH('appointment_requests', 'cancelled_at') IS NULL ALTER TABLE appointment_requests ADD cancelled_at DATETIME2 NULL");
         jdbcTemplate.execute("ALTER TABLE alert_notifications ALTER COLUMN title NVARCHAR(150) NOT NULL");
         jdbcTemplate.execute("ALTER TABLE alert_notifications ALTER COLUMN message NVARCHAR(500) NOT NULL");
+        repairScreeningTicketColumns();
+        repairScreeningTicketRows();
         jdbcTemplate.execute("UPDATE appointment_requests SET priority_level = N'Thông thường' WHERE priority_level IS NULL OR priority_level LIKE '%Ã%' OR priority_level LIKE '%áº%' OR priority_level LIKE '%á»%'");
         jdbcTemplate.execute("UPDATE appointment_requests SET department = N'Nội tổng quát' WHERE department LIKE 'N%i t%ng qu%t' OR department LIKE '%N?i t?ng quát%' OR department LIKE '%Noi tong quat%'");
         jdbcTemplate.execute("UPDATE appointment_requests SET department = N'Cấp cứu' WHERE department LIKE 'C%p c%u' OR department LIKE '%Cap cuu%'");
@@ -258,6 +260,19 @@ public class DemoDataInitializer implements CommandLineRunner {
                 SET name = ?, location = ?, working_hours = ?, hotline = ?, description = ?
                 WHERE code = ?
                 """, name, location, workingHours, "1900 1234", description, code);
+    }
+
+    private void repairScreeningTicketColumns() {
+        jdbcTemplate.execute("ALTER TABLE screening_tickets ALTER COLUMN patient_message NVARCHAR(MAX) NULL");
+        jdbcTemplate.execute("ALTER TABLE screening_tickets ALTER COLUMN suggested_department NVARCHAR(100) NOT NULL");
+        jdbcTemplate.execute("ALTER TABLE screening_tickets ALTER COLUMN risk_level NVARCHAR(50) NOT NULL");
+        jdbcTemplate.execute("ALTER TABLE screening_tickets ALTER COLUMN summary NVARCHAR(MAX) NOT NULL");
+    }
+
+    private void repairScreeningTicketRows() {
+        jdbcTemplate.execute("UPDATE screening_tickets SET suggested_department = N'N\u1ed9i t\u1ed5ng qu\u00e1t', risk_level = N'nh\u1eb9', summary = N'Vui l\u00f2ng nh\u1eadp c\u00e2u h\u1ecfi ho\u1eb7c m\u00f4 t\u1ea3 tri\u1ec7u ch\u1ee9ng \u0111\u1ec3 t\u00f4i h\u1ed7 tr\u1ee3.' + CHAR(10) + N'B\u1ea1n c\u00f3 th\u1ec3 h\u1ecfi v\u1ec1 gi\u1edd kh\u00e1m, \u0111\u1ecba ch\u1ec9, hotline ho\u1eb7c m\u00f4 t\u1ea3 tri\u1ec7u ch\u1ee9ng \u0111\u1ec3 \u0111\u01b0\u1ee3c s\u00e0ng l\u1ecdc s\u01a1 b\u1ed9.' WHERE (patient_message IS NULL OR LTRIM(RTRIM(patient_message)) = '') AND summary LIKE '%?%'");
+        jdbcTemplate.execute("UPDATE screening_tickets SET suggested_department = N'N\u1ed9i t\u1ed5ng qu\u00e1t' WHERE suggested_department LIKE '%Ã%' OR suggested_department LIKE '%áº%' OR suggested_department LIKE '%á»%' OR suggested_department LIKE '%N?i%' OR suggested_department LIKE '%Noi tong quat%'");
+        jdbcTemplate.execute("UPDATE screening_tickets SET risk_level = N'nh\u1eb9' WHERE risk_level LIKE '%Ã%' OR risk_level LIKE '%áº%' OR risk_level LIKE '%á»%' OR risk_level LIKE '%nh?%'");
     }
 
     private void updatePrice(String code, String serviceName, String note) {
