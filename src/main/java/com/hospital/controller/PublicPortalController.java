@@ -172,11 +172,13 @@ public class PublicPortalController {
     public String screeningTicket(@PathVariable Long id, Model model) {
         ScreeningTicket ticket = screeningTicketRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("KhÃ´ng tÃ¬m tháº¥y phiáº¿u sÃ ng lá»c"));
+        repairScreeningTicketText(ticket);
         model.addAttribute("ticket", ticket);
         return "patient/screening-ticket";
     }
 
     private void prefillFromTicket(AppointmentRequest appointment, ScreeningTicket ticket) {
+        repairScreeningTicketText(ticket);
         appointment.setScreeningTicketId(ticket.getId());
         appointment.setDepartment(ticket.getSuggestedDepartment());
         appointment.setSymptoms(ticket.getPatientMessage());
@@ -218,6 +220,12 @@ public class PublicPortalController {
         appointment.setDepartment(repairUtf8Deep(appointment.getDepartment()));
         appointment.setPriorityLevel(repairUtf8Deep(appointment.getPriorityLevel()));
         appointment.setTriageSummary(repairUtf8Deep(appointment.getTriageSummary()));
+    }
+
+    private void repairScreeningTicketText(ScreeningTicket ticket) {
+        ticket.setSuggestedDepartment(repairUtf8Deep(ticket.getSuggestedDepartment()));
+        ticket.setRiskLevel(repairUtf8Deep(ticket.getRiskLevel()));
+        ticket.setSummary(repairUtf8Deep(ticket.getSummary()));
     }
 
     private String repairUtf8Deep(String value) {
